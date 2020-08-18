@@ -1173,6 +1173,11 @@ EOT;
             $check = tep_db_fetch_array($check_query);
 
             $status_id = $check['orders_status_id'];
+
+            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+            if (tep_db_num_rows($flags_query) == 1) {
+                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
+            }
         }
 
 
@@ -1200,6 +1205,11 @@ EOT;
             $check = tep_db_fetch_array($check_query);
 
             $status_rejected_id = $check['orders_status_id'];
+
+            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+            if (tep_db_num_rows($flags_query) == 1) {
+                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
+            }
         }
 
         // new status for quickpay pending orders
@@ -1226,6 +1236,11 @@ EOT;
             $check = tep_db_fetch_array($check_query);
 
             $status_pending_id = $check['orders_status_id'];
+
+            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+            if (tep_db_num_rows($flags_query) == 1) {
+                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
+            }
         }
 
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable quickpay_advanced', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS', 'False', 'Do you want to accept quickpay payments?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
