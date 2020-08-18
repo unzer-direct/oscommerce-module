@@ -260,19 +260,19 @@ class quickpay_advanced {
                         foreach($selectedopts as $option){
                             $optscount++;
 
-                            $iconc = "";
-                            if(file_exists(DIR_WS_ICONS.$optionc.".png")){
-                              $iconc = DIR_WS_ICONS.$optionc.".png";
-                            }elseif(file_exists(DIR_WS_ICONS.$optionc.".jpg")){
-                              $iconc = DIR_WS_ICONS.$optionc.".jpg";
-                            }elseif(file_exists(DIR_WS_ICONS.$optionc.".gif")){
-                              $iconc = DIR_WS_ICONS.$optionc.".gif";
+                            $icon = "";
+                            if(file_exists(DIR_WS_ICONS.$option.".png")){
+                              $icon = DIR_WS_ICONS.$option.".png";
+                            }elseif(file_exists(DIR_WS_ICONS.$option.".jpg")){
+                              $icon = DIR_WS_ICONS.$option.".jpg";
+                            }elseif(file_exists(DIR_WS_ICONS.$option.".gif")){
+                              $icon = DIR_WS_ICONS.$option.".gif";
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.png")){
-                              $iconc = DIR_WS_ICONS . $option . "_payment.png";
+                              $icon = DIR_WS_ICONS . $option . "_payment.png";
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.jpg")){
-                              $iconc = DIR_WS_ICONS . $option . "_payment.jpg";
+                              $icon = DIR_WS_ICONS . $option . "_payment.jpg";
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.gif")){
-                              $iconc = DIR_WS_ICONS . $option . "_payment.gif";
+                              $icon = DIR_WS_ICONS . $option . "_payment.gif";
                             }
                             $space = 5;
 
@@ -1167,7 +1167,7 @@ EOT;
             // compatibility ms2.2
             $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
             if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 0 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
+                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
             }
         } else {
             $check = tep_db_fetch_array($check_query);
@@ -1194,7 +1194,7 @@ EOT;
             // compatibility ms2.2
             $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
             if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 0 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
+                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
             }
         } else {
             $check = tep_db_fetch_array($check_query);
@@ -1220,7 +1220,7 @@ EOT;
             // compatibility ms2.2
             $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
             if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 0 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
+                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
             }
         } else {
             $check = tep_db_fetch_array($check_query);
