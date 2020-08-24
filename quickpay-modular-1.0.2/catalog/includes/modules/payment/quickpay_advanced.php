@@ -363,18 +363,20 @@ class quickpay_advanced {
                     setQuickPay();
                 }
 
-                /* For each payment method */
-                document.checkout_payment.payment.forEach(function(node) {
-                  /* Apply for radio input and for his parent row */
-                  [node, node.parentElement.parentElement].forEach(item => {
-                    /* When a payment method is selected deselect all subpayment methods */
-                    item.addEventListener("click", function() {
-                        document.checkout_payment.qp_card.forEach(function(sub_node) {
-                            sub_node.checked=false;
+                document.addEventListener("DOMContentLoaded", function(){
+                    /* For each payment method */
+                    document.checkout_payment.payment.forEach(function(node) {
+                      /* Apply for radio input and for his parent row */
+                      [node, node.parentElement.parentElement].forEach(item => {
+                        /* When a payment method is selected deselect all subpayment methods */
+                        item.addEventListener("click", function() {
+                            document.checkout_payment.qp_card.forEach(function(sub_node) {
+                                sub_node.checked=false;
+                            });
                         });
-                    });
-                  })
-                })
+                      })
+                    })
+                });
 
             //--></script>';
 
@@ -1163,21 +1165,14 @@ EOT;
             for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
                 tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_id . "', '" . $languages[$i]['id'] . "', 'Quickpay [preparing]')");
             }
-
-            // compatibility ms2.2
-            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
-            }
         } else {
             $check = tep_db_fetch_array($check_query);
-
             $status_id = $check['orders_status_id'];
-
-            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
-            }
+        }
+        // compatibility ms2.2
+        $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+        if (tep_db_num_rows($flags_query) == 1) {
+            tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_id . "'");
         }
 
 
@@ -1196,20 +1191,15 @@ EOT;
                 tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_rejected_id . "', '" . $languages[$i]['id'] . "', 'Quickpay [rejected]')");
             }
 
-            // compatibility ms2.2
-            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
-            }
         } else {
             $check = tep_db_fetch_array($check_query);
 
             $status_rejected_id = $check['orders_status_id'];
-
-            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
-            }
+        }
+        // compatibility ms2.2
+        $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+        if (tep_db_num_rows($flags_query) == 1) {
+            tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
         }
 
         // new status for quickpay pending orders
@@ -1226,21 +1216,15 @@ EOT;
             for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
                 tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_pending_id . "', '" . $languages[$i]['id'] . "', 'Pending [Quickpay approved]')");
             }
-
-            // compatibility ms2.2
-            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
-            }
         } else {
             $check = tep_db_fetch_array($check_query);
 
             $status_pending_id = $check['orders_status_id'];
-
-            $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1) {
-                tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
-            }
+        }
+        // compatibility ms2.2
+        $flags_query = tep_db_query("describe " . TABLE_ORDERS_STATUS . " public_flag");
+        if (tep_db_num_rows($flags_query) == 1) {
+            tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
         }
 
         tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable quickpay_advanced', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS', 'False', 'Do you want to accept quickpay payments?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
