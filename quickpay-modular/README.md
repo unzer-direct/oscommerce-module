@@ -21,7 +21,6 @@ https://forums.oscommerce.com/topic/412146-quickpay-payment-module-for-23/
 Changelog
 1.0.3
 - Added possibility to configure the text displayed for the payment options.
-- Removed version from folder name.
 1.0.2
 - Indented all code to ease future development.
 - Fixed not defined variable warnings:
