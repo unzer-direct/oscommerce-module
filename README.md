@@ -2,7 +2,7 @@
 Quickpay payment module for osCommerce
 Modular package.
 
-Version 1.0.3 - 11.09.2020
+Version 1.0.4 - 28.10.2020
 
 Compatibility:
 Quickpay API v10 with
@@ -19,9 +19,11 @@ Support thread on osCommerce forums:
 https://forums.oscommerce.com/topic/412146-quickpay-payment-module-for-23/
 
 Changelog
+1.0.4
+- Added all payment request fields in accordance to the documentation.
+- Removed custom variables from payment request.
 1.0.3
 - Added possibility to configure the text displayed for the payment options.
-- Removed version from folder name.
 1.0.2
 - Indented all code to ease future development.
 - Fixed not defined variable warnings:

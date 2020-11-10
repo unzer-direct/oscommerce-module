@@ -35,7 +35,7 @@ class QPConnectorCurl implements QPConnectorInterface {
        $this->apiVersion = $apiVersion;
     }
 
-    public function request($resource, $postdata=null, $sendmode='GET-POST') {
+    public function request($resource, $requestData = null, $sendmode='GET-POST') {
         $curl =  curl_init();
         $url = $this->apiUrl . "/" . $resource;
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -47,13 +47,18 @@ class QPConnectorCurl implements QPConnectorInterface {
             'Accept: ' . $this->format
         ));
 
-        if (!is_null($postdata)) {
-            if($sendmode=='GET-POST'){
+        if (!is_null($requestData)) {
+            if($sendmode == 'GET-POST'){
                 curl_setopt($curl, CURLOPT_POST, 1);
             }else{
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
             }
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postdata));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($requestData));
+            // Build a string query based on the form array values
+            $requestFormData = preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', http_build_query($requestData, '', '&'));
+
+            // Prepare to post the data string
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $requestFormData);
         }
 
         $response = curl_exec($curl);

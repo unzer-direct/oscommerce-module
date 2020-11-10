@@ -52,12 +52,12 @@ define('MODULE_AVAILABLE_CREDITCARDS',array(
 ));
 
 include(DIR_FS_CATALOG.DIR_WS_CLASSES.'QuickpayApi.php');
+include(DIR_FS_CATALOG.DIR_WS_CLASSES.'QuickpayISO3166.php');
 
 class quickpay_advanced {
 
     var $code, $title, $description, $enabled, $creditcardgroup, $num_groups;
 
-// class constructor
     function __construct() {
         global $order,$cardlock;
 
@@ -94,16 +94,15 @@ class quickpay_advanced {
             }
         }
 
-//V10
-        if($_POST['quickpayIT'] == "go" && !isset($_SESSION['qlink'])) {
+        /** V10 */
+        if (("go" == $_POST['quickpayIT']) && !isset($_SESSION['qlink'])) {
             $this->form_action_url = 'https://payment.quickpay.net/';
-        }else{
+        } else {
             $this->form_action_url = tep_href_link(FILENAME_CHECKOUT_CONFIRMATION, '', 'SSL');
         }
     }
 
-
-// class methods
+    /** Class methods */
     function update_status() {
         global $order, $quickpay_fee, $HTTP_POST_VARS, $qp_card;
 
@@ -127,20 +126,20 @@ class quickpay_advanced {
 
         if (!tep_session_is_registered('qp_card'))
             tep_session_register('qp_card');
+
         if (isset($_POST['qp_card']))
             $qp_card = $_POST['qp_card'];
 
         if (!tep_session_is_registered('cart_QuickPay_ID'))
             tep_session_register('cart_QuickPay_ID');
+
         if (isset($_GET['cart_QuickPay_ID']))
             $qp_card = $_GET['cart_QuickPay_ID'];
-
 
         if (!tep_session_is_registered('quickpay_fee')) {
             tep_session_register('quickpay_fee');
         }
     }
-
 
     function javascript_validation() {
         $js = '  if (payment_value == "' . $this->code . '") {' . "\n" .
@@ -169,8 +168,8 @@ class quickpay_advanced {
         return $js;
     }
 
-
-    function selection() {
+    /* Define payment method selector on checkout page */
+    public function selection() {
         global $order, $currencies, $qp_card, $cardlock;
         $qty_groups = 0;
 
@@ -213,7 +212,7 @@ class quickpay_advanced {
                                 $iconc = DIR_WS_ICONS.$optionc.".gif";
                             }
 
-                            //define payment icon width
+                            /** Define payment icons width */
                             $w = 35;
                             $h = 22;
                             $space = 5;
@@ -257,7 +256,7 @@ class quickpay_advanced {
                                     ' onClick="setQuickPay(); document.checkout_payment.cardlock.value = \''.$option.'\';" '
                                 )
                             );
-                        }//end qty=1
+                        }/** end qty=1 */
                     }
 
                     if($option != "creditcard"){
@@ -677,7 +676,7 @@ EOT;
         // }else{return false;}
     }
 
-
+    /* Define payment button and data array to be sent */
     function process_button() {
         global $_POST, $customer_id, $order, $currencies, $currency, $languages_id, $language, $cart_QuickPay_ID, $order_total_modules, $messageStack;
         /** collect all post fields and attach as hiddenfieds to button */
@@ -690,14 +689,12 @@ EOT;
         }
 
         $process_button_string = '';
-        $process_fields ='';
-        $process_parameters = array();
+        $process_parameters = null;
 
         $qp_merchant_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_MERCHANTID;
         $qp_agreement_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_AGGREEMENTID;
 
-
-        // TODO: dynamic language switching instead of hardcoded mapping
+        /** TODO: dynamic language switching instead of hardcoded mapping */
         $qp_language = "da";
         switch ($language) {
             case "english": $qp_language = "en";
@@ -719,7 +716,7 @@ EOT;
         $qp_description = "Merchant ".$qp_merchant_id." ".(MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "Authorize" : "Subscription");
         $order_id = substr($cart_QuickPay_ID, strpos($cart_QuickPay_ID, '-') + 1);
         $qp_order_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX.sprintf('%04d', $order_id);
-        // Calculate the total order amount for the order (the same way as in checkout_process.php)
+        /** Calculate the total order amount for the order (the same way as in checkout_process.php) */
         $qp_order_amount = 100 * $currencies->calculate($order->info['total'], true, $order->info['currency'], $order->info['currency_value'], '.', '');
         $qp_currency_code = $order->info['currency'];
         $qp_continueurl = tep_href_link(FILENAME_CHECKOUT_PROCESS, 'cart_QuickPay_ID='.$cart_QuickPay_ID, 'SSL');
@@ -734,172 +731,118 @@ EOT;
         // $qp_reference_title = $qp_order_id;
         // $qp_vat_amount = ($order->info['tax'] ? $order->info['tax'] : "0.00");
 
+
         //custom vars
-        $varsvalues = array(
-            'variables[customers_id]' => $customer_id,
-            'variables[customers_name]' => $order->customer['firstname'] . ' ' . $order->customer['lastname'],
-            'variables[customers_company]' => $order->customer['company'],
-            'variables[customers_street_address]' => $order->customer['street_address'],
-            'variables[customers_suburb]' => $order->customer['suburb'],
-            'variables[customers_city]' => $order->customer['city'],
-            'variables[customers_postcode]' => $order->customer['postcode'],
-            'variables[customers_state]' => $order->customer['state'],
-            'variables[customers_country]' => $order->customer['country']['title'],
-            'variables[customers_telephone]' => $order->customer['telephone'],
-            'variables[customers_email_address]' => $order->customer['email_address'],
-            'variables[delivery_name]' => $order->delivery['firstname'] . ' ' . $order->delivery['lastname'],
-            'variables[delivery_company]' => $order->delivery['company'],
-            'variables[delivery_street_address]' => $order->delivery['street_address'],
-            'variables[delivery_suburb]' => $order->delivery['suburb'],
-            'variables[delivery_city]' => $order->delivery['city'],
-            'variables[delivery_postcode]' => $order->delivery['postcode'],
-            'variables[delivery_state]' => $order->delivery['state'],
-            'variables[delivery_country]' => $order->delivery['country']['title'],
-            'variables[delivery_address_format_id]' => $order->delivery['format_id'],
-            'variables[billing_name]' => $order->billing['firstname'] . ' ' . $order->billing['lastname'],
-            'variables[billing_company]' => $order->billing['company'],
-            'variables[billing_street_address]' => $order->billing['street_address'],
-            'variables[billing_suburb]' => $order->billing['suburb'],
-            'variables[billing_city]' => $order->billing['city'],
-            'variables[billing_postcode]' => $order->billing['postcode'],
-            'variables[billing_state]' => $order->billing['state'],
-            'variables[billing_country]' => $order->billing['country']['title']
-        );
+        $process_parameters = [
+            'agreement_id' => $qp_agreement_id,
+            'amount' => $qp_order_amount,
+            'autocapture' => $qp_autocapture,
+            'autofee' => $qp_autofee,
+            'callbackurl' => $qp_callbackurl,
+            'cancelurl' => $qp_cancelurl,
+            'continueurl' => $qp_continueurl,
+            'currency' => $qp_currency_code,
+            'description' => $qp_description,
+            'language' => $qp_language,
+            'merchant_id' => $qp_merchant_id,
+            'order_id' => $qp_order_id,
+            'payment_methods' => $qp_cardtypelock,
+            'subscription' => $qp_subscription,
+            'version' => 'v10',
+
+            'invoice_address' => [
+                'name' => ((isset($order->billing['firstname'])) ? ($order->billing['firstname']) : ('')) . ((isset($order->billing['lastname'])) ? (' ' . $order->billing['lastname']) : ('')),
+                'att' => '',
+                'company_name' => (isset($order->billing['company'])) ? ($order->billing['company']) : (''),
+                'street' => (isset($order->billing['street_address'])) ? ($order->billing['street_address']) : (''),
+                'house_number' => '',
+                'house_extension' => '',
+                'city' => (isset($order->billing['city'])) ? ($order->billing['city']) : (''),
+                'zip_code' => (isset($order->billing['postcode'])) ? ($order->billing['postcode']) : (''),
+                'region' => (isset($order->billing['state'])) ? ($order->billing['state']): (''),
+                'country_code' => QuickpayISO3166::alpha3($order->billing['country']['title']),
+                'vat_no' => '',
+                'phone_number' => '',
+                'mobile_number' => (isset($order->customer['telephone'])) ? ($order->customer['telephone']) : (''),
+                'email' => (isset($order->customer['email_address'])) ? ($order->customer['email_address']) : ('')
+            ],
+
+            'shipping_address' => [
+                'name' => ((isset($order->delivery['firstname'])) ? ($order->delivery['firstname']) : ('')) . ((isset($order->billing['lastname'])) ? (' ' . $order->billing['lastname']) : ('')),
+                'att' => '',
+                'company_name' => (isset($order->delivery['company'])) ? ($order->delivery['company']) : (''),
+                'street' => (isset($order->delivery['street_address'])) ? ($order->delivery['street_address']) : (''),
+                'house_number' => '',
+                'house_extension' => '',
+                'city' => (isset($order->delivery['city'])) ? ($order->delivery['city']) : (''),
+                'zip_code' => (isset($order->delivery['postcode'])) ? ($order->delivery['postcode']) : (''),
+                'region' => (isset($order->delivery['state'])) ? ($order->delivery['state']) : (''),
+                'country_code' => QuickpayISO3166::alpha3($order->delivery['country']['title']),
+                'vat_no' => '',
+                'phone_number' => '',
+                'mobile_number' => (isset($order->customer['telephone'])) ? ($order->customer['telephone']) : (''),
+                'email' => (isset($order->customer['email_address'])) ? ($order->customer['email_address']) : ('')
+            ],
+
+            'basket' => [],
+
+            'shopsystem' => [
+                'name' => "OsCommerce",
+                'version' => "1.0.4"
+            ]
+        ];
 
         for ($i = 0, $n = sizeof($order->products); $i < $n; $i++) {
-            $order_products_id = tep_get_prid($order->products[$i]['id']);
-
-            //------insert customer choosen option to order--------
-            $attributes_exist = '0';
-            $products_ordered_attributes = '';
-            if (isset($order->products[$i]['attributes'])) {
-                $attributes_exist = '1';
-                for ($j = 0, $n2 = sizeof($order->products[$i]['attributes']); $j < $n2; $j++) {
-                    if (DOWNLOAD_ENABLED == 'true') {
-                        $attributes_query = "select popt.products_options_name, poval.products_options_values_name, pa.options_values_price, pa.price_prefix, pad.products_attributes_maxdays, pad.products_attributes_maxcount , pad.products_attributes_filename
-                        from " . TABLE_PRODUCTS_OPTIONS . " popt, " . TABLE_PRODUCTS_OPTIONS_VALUES . " poval, " . TABLE_PRODUCTS_ATTRIBUTES . " pa
-                        left join " . TABLE_PRODUCTS_ATTRIBUTES_DOWNLOAD . " pad
-                        on pa.products_attributes_id=pad.products_attributes_id
-                        where pa.products_id = '" . $order->products[$i]['id'] . "'
-                        and pa.options_id = '" . $order->products[$i]['attributes'][$j]['option_id'] . "'
-                        and pa.options_id = popt.products_options_id
-                        and pa.options_values_id = '" . $order->products[$i]['attributes'][$j]['value_id'] . "'
-                        and pa.options_values_id = poval.products_options_values_id
-                        and popt.language_id = '" . $languages_id . "'
-                        and poval.language_id = '" . $languages_id . "'";
-                        $attributes = tep_db_query($attributes_query);
-                    } else {
-                        $attributes = tep_db_query("select popt.products_options_name, poval.products_options_values_name, pa.options_values_price, pa.price_prefix from " . TABLE_PRODUCTS_OPTIONS . " popt, " . TABLE_PRODUCTS_OPTIONS_VALUES . " poval, " . TABLE_PRODUCTS_ATTRIBUTES . " pa where pa.products_id = '" . $order->products[$i]['id'] . "' and pa.options_id = '" . $order->products[$i]['attributes'][$j]['option_id'] . "' and pa.options_id = popt.products_options_id and pa.options_values_id = '" . $order->products[$i]['attributes'][$j]['value_id'] . "' and pa.options_values_id = poval.products_options_values_id and popt.language_id = '" . $languages_id . "' and poval.language_id = '" . $languages_id . "'");
-                    }
-                    $attributes_values = tep_db_fetch_array($attributes);
-
-                    if ((DOWNLOAD_ENABLED == 'true') && isset($attributes_values['products_attributes_filename']) && tep_not_null($attributes_values['products_attributes_filename'])) {
-
-                    }
-                    $products_ordered_attributes .= "(" . $attributes_values['products_options_name'] . ' ' . $attributes_values['products_options_values_name'].") ";
-                }
-            }
-
-            //------insert customer choosen option eof ----
-            $total_weight += ( $order->products[$i]['qty'] * $order->products[$i]['weight']);
-            $total_tax += tep_calculate_tax($total_products_price, $products_tax) * $order->products[$i]['qty'];
-            $total_cost += $total_products_price;
-
-            $products_ordered[] = $order->products[$i]['qty'] . ' x ' . $order->products[$i]['name'] . ' (' . $order->products[$i]['model'] . ') = ' . $currencies->display_price($order->products[$i]['final_price'], $order->products[$i]['tax'], $order->products[$i]['qty']) . $products_ordered_attributes . "-";
-
+            $process_parameters['basket'][] = [
+                'qty' =>  $order->products[$i]['qty'],
+                'item_no' =>  $order->products[$i]['id'],
+                'item_name' =>  $order->products[$i]['name'],
+                'item_price' =>  ($order->products[$i]['final_price'] * $order->products[$i]['qty']),
+                'vat_rate' =>  ''
+            ];
         }
 
-        $ps="";
-        while (list ($key, $value) = each($products_ordered)) {
-            $ps .= $value;
-        }
-
-        $varsvalues["variables[products]"] = html_entity_decode($ps);
-        $varsvalues["variables[shopsystem]"] = "OsCommerce";
-        //end custom vars
-
-        // register fields to hand over
-        $process_parameters = array(
-            'agreement_id'                 => $qp_agreement_id,
-            'amount'                       => $qp_order_amount,
-            'autocapture'                  => $qp_autocapture,
-            'autofee'                      => $qp_autofee,
-            // 'branding_id'                  => $qp_branding_id,
-            'callbackurl'                  => $qp_callbackurl,
-            'cancelurl'                    => $qp_cancelurl,
-            'continueurl'                  => $qp_continueurl,
-            'currency'                     => $qp_currency_code,
-            'description'                  => $qp_description,
-            // 'google_analytics_client_id'   => $qp_google_analytics_client_id,
-            // 'google_analytics_tracking_id' => $analytics_tracking_id,
-            'language'                     => $qp_language,
-            'merchant_id'                  => $qp_merchant_id,
-            'order_id'                     => $qp_order_id,
-            'payment_methods'              => $qp_cardtypelock,
-            // 'product_id'                   => $qp_product_id,
-            // 'category'                     => $qp_category,
-            // 'reference_title'              => $qp_reference_title,
-            // 'vat_amount'                   => $qp_vat_amount,
-            'subscription'                 => $qp_subscription,
-            'version'                      => 'v10'
-        );
-
-
-        $process_parameters = array_merge($process_parameters,$varsvalues);
-        // $dumpvar = "-- get process parameters\n";
-        // $dumpvar .= print_r($process_parameters,true)."\n";
-
-        if($_POST['callquickpay'] == "go") {
-            $apiorder= new QuickpayApi();
+        if("go" == $_POST['callquickpay']) {
+            $apiorder = new QuickpayApi();
             $apiorder->setOptions(MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY);
-            //set status request mode
-            $mode = (MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
-            //been here before?
+
+            /** Set status request mode */
+            $mode = (("Normal" == MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION) ? ("") : ("1"));
+
+            /** Set to create/update mode */
+            $apiorder->mode = (("Normal" == MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION) ? ("payments/") : ("subscriptions/"));
+
+            /** Check if order exists. */
+            $qid = null;
             $exists = $this->get_quickpay_order_status($order_id, $mode);
-
-            // $dumpvar .= "-- get order status\n";
-            // $dumpvar .= print_r($exists,true)."\n";
-            $qid = $exists["qid"];
-            //set to create/update mode
-            $apiorder->mode = (MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "payments/" : "subscriptions/");
-
-            if($exists["qid"] == null){
-                //create new quickpay order
+            if (null == $exists["qid"]) {
+                /** Create new quickpay order */
                 $storder = $apiorder->createorder($qp_order_id, $qp_currency_code, $process_parameters);
                 $qid = $storder["id"];
-
-            }else{
+            } else {
                 $qid = $exists["qid"];
             }
 
-            // $dumpvar .= "-- Create order\n";
-            // $dumpvar .= print_r($storder,true)."\n";
             $storder = $apiorder->link($qid, $process_parameters);
-            // $dumpvar .= "-- Get link\n";
-            // $dumpvar .= print_r($storder,true)."\n";
-            // exit("<pre>".$dumpvar."</pre>");
 
-            if (substr($storder['url'],0,5) <> 'https') {
+            if (substr($storder['url'], 0, 5) <> 'https') {
                 $messageStack->add_session(MODULE_PAYMENT_QUICKPAY_ADVANCED_ERROR_COMMUNICATION_FAILURE, 'error');
                 tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL'));
             }
 
-            $process_button_string .= "
-                <script>
-                    //alert('qp ".$qp_order_id."-".$order_id."');
-                    window.location.replace('".$storder['url']."');
-                </script>";
+            $process_button_string .= "<script>window.location.replace('" . $storder['url'] . "');</script>";
         }
-        $process_button_string .=  "<input type='hidden' value='go' name='callquickpay' />". "\n".
+
+        $process_button_string .=  "<input type='hidden' value='go' name='callquickpay' />" . "\n".
                                    "<input type='hidden' value='" . $_POST['cardlock'] . "' name='cardlock' />";
 
         return $process_button_string;
     }
 
-
+    /* Before order is processed */
     function before_process() {
-        // called in FILENAME_CHECKOUT_PROCESS
-        // check if order is approved by callback
+        /** Called in FILENAME_CHECKOUT_PROCESS */
+        /** check if order is approved by callback */
         global $customer_id, $order, $order_id, $order_totals, $order_total_modules, $sendto, $billto, $languages_id, $payment, $currencies, $cart, $cart_QuickPay_ID;
 
         $order_id = substr($cart_QuickPay_ID, strpos($cart_QuickPay_ID, '-') + 1);
@@ -920,12 +863,13 @@ EOT;
             $order = new quickpay_order($order);
         }
 
-        //for debugging with FireBug / FirePHP
+        /** For debugging with FireBug / FirePHP */
         global $firephp;
         if (isset($firephp)) {
             $firephp->log($order_id, 'order_id');
         }
 
+        /** Update order status */
         tep_db_query("update " . TABLE_ORDERS . " set orders_status = '" . (int)$order_status_approved_id . "', last_modified = now() where orders_id = '" . (int)$order_id . "'");
 
         $sql_data_array = array(
@@ -1058,7 +1002,7 @@ EOT;
         $this->after_process();
     }
 
-
+    /* After order is processed */
     function after_process() {
         global $cart;
 
@@ -1427,21 +1371,21 @@ EOT;
     }
 
 
-    private function get_quickpay_order_status($order_id,$mode="") {
-        $api= new QuickpayApi();
-
+    private function get_quickpay_order_status($order_id, $mode="") {
+        $api = new QuickpayApi();
         $api->setOptions(MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY);
 
         try {
-            $api->mode = ($mode=="" ? "payments?order_id=" : "subscriptions?order_id=");
+            $api->mode = ($mode == "" ? "payments?order_id=" : "subscriptions?order_id=");
 
             // Commit the status request, checking valid transaction id
-            $st = $api->status(MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX.sprintf('%04d', $order_id));
+            $st = $api->status(MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX . sprintf('%04d', $order_id));
+
             $eval = array();
-            if($st[0]["id"]){
-                $eval["oid"] = str_replace(MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX,"", $st[0]["order_id"]);
+            if ($st[0]["id"]) {
+                $eval["oid"] = str_replace(MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX, "", $st[0]["order_id"]);
                 $eval["qid"] = $st[0]["id"];
-            }else{
+            } else {
                 $eval["oid"] = null;
                 $eval["qid"] = null;
             }

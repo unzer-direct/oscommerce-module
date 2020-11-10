@@ -18,17 +18,17 @@ class QuickpayApi {
 
     public $mode = "payments/";
 
-      /**
-    * Set the options for this object
-    * apikey is found in https://manage.quickpay.net
-    */
+    /**
+     * Set the options for this object
+     * apikey is found in https://manage.quickpay.net
+     */
     function setOptions($apiKey, $connTimeout=10, $apiVersion="v10") {
         QPConnectorFactory::getConnector()->setOptions($apiKey, $connTimeout, $apiVersion);
     }
 
     /**
-    * Get a list of payments.
-    */
+     * Get a list of payments.
+     */
     function getPayments() {
         $result = QPConnectorFactory::getConnector()->request($this->mode);
         return json_decode($result, true);
@@ -52,8 +52,8 @@ class QuickpayApi {
 
 
     /**
-    * Renew a payment
-    */
+     * Renew a payment
+     */
     function renew($id) {
         $postArray = array();
         $postArray['id'] = $id;
@@ -78,8 +78,8 @@ class QuickpayApi {
     }
 
     /**
-    * Refund a payment
-    */
+     * Refund a payment
+     */
     function refund($id, $amount, $extras=null) {
         $postArray = array();
         $postArray['id'] = $id;
@@ -94,8 +94,8 @@ class QuickpayApi {
 
 
     /**
-    * Cancel a payment
-    */
+     * Cancel a payment
+     */
     function cancel($id) {
         $postArray = array();
         $postArray['id'] = $id;
