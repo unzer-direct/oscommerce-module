@@ -1,22 +1,22 @@
-# quickpay-oscommerce-module
-Quickpay payment module for osCommerce
+# unzer-oscommerce-module
+Unzer payment module for osCommerce
 Modular package.
 
 Version 1.0.4 - 28.10.2020
 
 Compatibility:
-Quickpay API v10 with
+Unzer API v10 with
 - osCommerce 2.3.4 and 2.3.4.1
 - osCommerce 2.3.4 BS (Community Responsive project, Gold and Edge versions)
 
 Can be installed without code changes on a store prepared for the Paypal App
 
-Built from an existing payment module by BLKOM https://github.com/loevendahl/quickpay10-oscommerce
+Built from an existing payment module by BLKOM https://github.com/loevendahl/unzer10-oscommerce
 Additional Danish translations, testing and improvements by Bo Herrmannsen @boelle
-Version 1.0 sponsored by Quickpay.net
+Version 1.0 sponsored by Unzerdirect.com
 
 Support thread on osCommerce forums:
-https://forums.oscommerce.com/topic/412146-quickpay-payment-module-for-23/
+https://forums.oscommerce.com/topic/412146-unzer-payment-module-for-23/
 
 Changelog
 1.0.4
@@ -27,13 +27,13 @@ Changelog
 1.0.2
 - Indented all code to ease future development.
 - Fixed not defined variable warnings:
-  * Warning: Use of undefined constant MODULE_PAYMENT_QUICKPAY_ZONE
-  * Warning: Use of undefined constant MODULE_PAYMENT_QUICKPAY_ADVANCED_APIKEY
-- Added all quickpay payment options logos.
+  * Warning: Use of undefined constant MODULE_PAYMENT_UNZER_ZONE
+  * Warning: Use of undefined constant MODULE_PAYMENT_UNZER_ADVANCED_APIKEY
+- Added all unzer payment options logos.
 - Added translations for missing payment options.
 - Made orders visible in "My Account" section.
-- Fixed clearing of selected quickpay payment option when differrent payment option is selected.
+- Fixed clearing of selected unzer payment option when differrent payment option is selected.
 1.0.1
 - Two files updated for minor compatibility issues. Symptoms:
-   * on databases set up by a previous addon version, all orders were treated as if quickpay leading to Warning: array_reverse expects parameter 1 to be an array
+   * on databases set up by a previous addon version, all orders were treated as if unzer leading to Warning: array_reverse expects parameter 1 to be an array
   * link in confirmation email sent customer to FILENAME_ACCOUNT_HISTORY_INFO

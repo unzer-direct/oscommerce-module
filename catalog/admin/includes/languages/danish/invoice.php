@@ -27,7 +27,7 @@ define('ENTRY_SUB_TOTAL', 'Sub-Total:');
 define('ENTRY_TAX', 'Moms:');
 define('ENTRY_SHIPPING', 'Levering:');
 define('ENTRY_TOTAL', 'Total:');
-//Quickpay changed
+//Unzer changed
 define('DENUNCIATION', 'Ordren betales med ViaBill. Det skyldige beløb kan alene betales med frigørende virkning til ViaBill, som fremsender særskilt opkrævning. Betaling kan ikke ske ved modregning af krav, der udspringer af andre retsforhold');
-//Quickpay changed end
+//Unzer changed end
 ?>

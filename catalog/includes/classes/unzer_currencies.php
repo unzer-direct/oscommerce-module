@@ -10,7 +10,7 @@
  * author: Genuineq office@genuineq.com
  */
 
-class quickpay_currencies extends currencies {
+class unzer_currencies extends currencies {
 
     // subclass constructor
     function __construct($currencies) {

@@ -10,6 +10,6 @@
  * author: Genuineq office@genuineq.com
  */
 
-define('MODULE_BOXES_QUICKPAY_TITLE', 'Quickpay');
-define('MODULE_BOXES_QUICKPAY_DESCRIPTION', 'Vi modtager');   //means we accept
-define('MODULE_BOXES_QUICKPAY_BOX_TITLE', 'Vi modtager');
+define('MODULE_BOXES_UNZER_TITLE', 'Unzer');
+define('MODULE_BOXES_UNZER_DESCRIPTION', 'Vi modtager');   //means we accept
+define('MODULE_BOXES_UNZER_BOX_TITLE', 'Vi modtager');

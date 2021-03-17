@@ -10,27 +10,27 @@
  * author: Genuineq office@genuineq.com
  */
 
-include('QPConnectorInterface.php');
-include('QPConnectorCurl.php');
-include('QPConnectorFactory.php');
+include('UnzerConnectorInterface.php');
+include('UnzerConnectorCurl.php');
+include('UnzerConnectorFactory.php');
 
-class QuickpayApi {
+class UnzerApi {
 
     public $mode = "payments/";
 
     /**
      * Set the options for this object
-     * apikey is found in https://manage.quickpay.net
+     * apikey is found in https://insights.unzerdirect.com
      */
     function setOptions($apiKey, $connTimeout=10, $apiVersion="v10") {
-        QPConnectorFactory::getConnector()->setOptions($apiKey, $connTimeout, $apiVersion);
+        UnzerConnectorFactory::getConnector()->setOptions($apiKey, $connTimeout, $apiVersion);
     }
 
     /**
      * Get a list of payments.
      */
     function getPayments() {
-        $result = QPConnectorFactory::getConnector()->request($this->mode);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode);
         return json_decode($result, true);
     }
 
@@ -39,13 +39,13 @@ class QuickpayApi {
      * The errorcode 404 is set in the thrown exception if the order is not found
      */
     function status($id) {
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $id);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $id);
 
         return json_decode($result, true);
     }
 
     function link($id, $postArray) {
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $id . "/link?currency=" . $postArray["currency"] . "&amount=" . $postArray["amount"], $postArray, 'PUT');
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $id . "/link?currency=" . $postArray["currency"] . "&amount=" . $postArray["amount"], $postArray, 'PUT');
 
         return json_decode($result, true);
     }
@@ -57,7 +57,7 @@ class QuickpayApi {
     function renew($id) {
         $postArray = array();
         $postArray['id'] = $id;
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $id . '/renew', $postArray);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $id . '/renew', $postArray);
         return json_decode($result, true);
     }
 
@@ -72,7 +72,7 @@ class QuickpayApi {
         if (!is_null($extras)) {
             $postArray['extras'] = $extras;
         }
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $id . '/capture', $postArray);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $id . '/capture', $postArray);
 
         return json_decode($result, true);
     }
@@ -87,7 +87,7 @@ class QuickpayApi {
         if (!is_null($extras)) {
             $postArray['extras'] = $extras;
         }
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $id . '/refund', $postArray);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $id . '/refund', $postArray);
 
         return json_decode($result, true);
     }
@@ -99,13 +99,13 @@ class QuickpayApi {
     function cancel($id) {
         $postArray = array();
         $postArray['id'] = $id;
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $id . '/cancel', $postArray);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $id . '/cancel', $postArray);
 
         return json_decode($result, true);
     }
 
     function createorder($order_id, $currency, $postArray, $addlink='') {
-        $result = QPConnectorFactory::getConnector()->request($this->mode . $addlink . '?order_id=' . $order_id . '&currency=' . $currency, $postArray);
+        $result = UnzerConnectorFactory::getConnector()->request($this->mode . $addlink . '?order_id=' . $order_id . '&currency=' . $currency, $postArray);
 
         return json_decode($result, true);
     }
@@ -113,7 +113,7 @@ class QuickpayApi {
     function log_operations($operations, $currency = ""){
         $str="<ul>";
         foreach($operations as $op){
-            $str .= "<li><b>" . $op["type"] . "</b> - " . number_format($op["amount"]/100, 2, ',', '') . " " . $currency . ", <b>Quickpay info</b>: " . $op["qp_status_msg"] . ", <b>Aquirer info</b>: " . $op["aq_status_msg"] . ", <b>Log</b>: " . $op["created_at"] . (($op["fraud"]) ? (", <b>Fraud</b>: " . json_encode($op["fraud_remarks"])) : ("")) . "</li>";
+            $str .= "<li><b>" . $op["type"] . "</b> - " . number_format($op["amount"]/100, 2, ',', '') . " " . $currency . ", <b>Unzer info</b>: " . $op["unzer_status_msg"] . ", <b>Aquirer info</b>: " . $op["aq_status_msg"] . ", <b>Log</b>: " . $op["created_at"] . (($op["fraud"]) ? (", <b>Fraud</b>: " . json_encode($op["fraud_remarks"])) : ("")) . "</li>";
         }
         $str .= "<ul>";
 

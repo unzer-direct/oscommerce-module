@@ -11,17 +11,17 @@
  */
 
 /**
- * Quickpay v10+ php library
+ * Unzer v10+ php library
  *
- * Singleton for easy retrieval of the Quickpay connector implementation.
+ * Singleton for easy retrieval of the Unzer connector implementation.
  */
 
-class QPConnectorFactory {
+class UnzerConnectorFactory {
 
     public static function getConnector() {
         static $inst = null;
         if ($inst === null) {
-            $inst = new QPConnectorCurl();
+            $inst = new UnzerConnectorCurl();
         }
         return $inst;
     }

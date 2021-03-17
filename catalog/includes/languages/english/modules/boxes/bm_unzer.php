@@ -10,12 +10,6 @@
  * author: Genuineq office@genuineq.com
  */
 
-/**
- * Quickpay v10+ php library
- *
- * This interface must be implemented by any Quickpay connectors.
- */
-interface QPConnectorInterface {
-    public function request($data);
-}
-?>
+define('MODULE_BOXES_UNZER_TITLE', 'Unzer');
+define('MODULE_BOXES_UNZER_DESCRIPTION', 'Cards accepted');
+define('MODULE_BOXES_UNZER_BOX_TITLE', 'Accepted');

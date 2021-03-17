@@ -10,6 +10,12 @@
  * author: Genuineq office@genuineq.com
  */
 
-define('MODULE_BOXES_QUICKPAY_TITLE', 'Quickpay');
-define('MODULE_BOXES_QUICKPAY_DESCRIPTION', 'Cards accepted');
-define('MODULE_BOXES_QUICKPAY_BOX_TITLE', 'Accepted');
+/**
+ * Unzer v10+ php library
+ *
+ * This interface must be implemented by any Unzer connectors.
+ */
+interface UnzerConnectorInterface {
+    public function request($data);
+}
+?>

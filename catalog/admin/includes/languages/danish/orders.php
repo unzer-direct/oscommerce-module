@@ -81,26 +81,26 @@ define('EMAIL_TEXT_COMMENTS_UPDATE', 'Bemærkningerne til din bestilling er' . "
 define('ERROR_ORDER_DOES_NOT_EXIST', 'Fejl: Bestilling findes ikke.');
 define('SUCCESS_ORDER_UPDATED', 'Success: Bestillingen er nu opdateret.');
 define('WARNING_ORDER_NOT_UPDATED', 'Advarsel: Ingen ændringer. Bestillingen blev ikke opdateret.');
-// QuickPay added start
-define('ENTRY_QUICKPAY_TRANSACTION', 'QuickPay transaktion:');
-define('ENTRY_QUICKPAY_CARDHASH', 'Type:');
+// Unzer added start
+define('ENTRY_UNZER_TRANSACTION', 'Unzer transaktion:');
+define('ENTRY_UNZER_CARDHASH', 'Type:');
 define('IMAGE_TRANSACTION_CAPTURE_INFO', 'Gennemfør betaling');
 define('IMAGE_TRANSACTION_REVERSE_INFO', 'Annulér betaling');
 define('IMAGE_TRANSACTION_CREDIT_INFO', 'Krediter betaling');
 define('IMAGE_TRANSACTION_TIME_INFO_GREEN', 'Kan stadig hæves inden for PBS-garanteret periode');
 define('IMAGE_TRANSACTION_TIME_INFO_YELLOW', 'Sidste dag for PBS-garanteret hævning');
 define('IMAGE_TRANSACTION_TIME_INFO_RED', 'Sidste dag for PBS-garanteret hævning er overskredet');
-define('INFO_QUICKPAY_CAPTURED', 'Betalingen er gennemført');
-define('INFO_QUICKPAY_CREDITED', 'Beløbet er krediteret');
-define('INFO_QUICKPAY_REVERSED', 'Betalingen er annulleret');
-define('ENTRY_QUICKPAY_TRANSACTION_ID', 'Transaktions-id:');
+define('INFO_UNZER_CAPTURED', 'Betalingen er gennemført');
+define('INFO_UNZER_CREDITED', 'Beløbet er krediteret');
+define('INFO_UNZER_REVERSED', 'Betalingen er annulleret');
+define('ENTRY_UNZER_TRANSACTION_ID', 'Transaktions-id:');
 define('CONFIRM_REVERSE', 'Vil du annullere denne betaling?');
 define('CONFIRM_CAPTURE', 'Advarsel: Transaktionsbeløb er ikke identisk med ordrens total. Vil du gennemføre betalingen?');
 define('CONFIRM_CREDIT', 'Vil du kreditere kunden dette beløb?');
 define('PENDING_STATUS', 'Afventer indløser godkendelse.');
 define('PAYMENTLINK_INFO', 'Send dette link til kunde ved transaktionsproblem.');
-define('SUBSCRIPTION_ADMIN', 'Administration af abonnement betaling samt gentagne abonnementsbetalinger er ikke implementeret i denne gratis distribuerede version.<br>Brug Quickpay manager til administration af abonnementsbetalinger. Venligst kontakt <a href="mailto:info@blkom.dk" ><b>udvikler</b></a> for implementering af gentagne abonnementsbetalinger og abonnementsadministration <br>');
-define('ENTRY_QUICKPAY_STATUS','Gateway status');
-// QuickPay added end
+define('SUBSCRIPTION_ADMIN', 'Administration af abonnement betaling samt gentagne abonnementsbetalinger er ikke implementeret i denne gratis distribuerede version.<br>Brug Unzer manager til administration af abonnementsbetalinger. Venligst kontakt <a href="mailto:info@blkom.dk" ><b>udvikler</b></a> for implementering af gentagne abonnementsbetalinger og abonnementsadministration <br>');
+define('ENTRY_UNZER_STATUS','Gateway status');
+// Unzer added end
 
 ?>

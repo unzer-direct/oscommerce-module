@@ -13,7 +13,7 @@
 // 2.3.4BS Edge compatibility
 if (!defined('FILENAME_ORDERS')) define('FILENAME_ORDERS','orders.php');
 
-class hook_admin_orders_quickpay_payment_action {
+class hook_admin_orders_unzer_payment_action {
 
     function load_language() {
         global $language;
@@ -30,21 +30,21 @@ class hook_admin_orders_quickpay_payment_action {
             $amount = $_POST['amount_big'] . $_POST['amount_small'];
 
             switch ($_GET['tabaction']) {
-                case 'quickpay_reverse':
-                    $result = get_quickpay_reverse($oID);
+                case 'unzer_reverse':
+                    $result = get_unzer_reverse($oID);
                     tep_redirect(tep_href_link(FILENAME_ORDERS, tep_get_all_get_params(array('tabaction')) . 'action=edit'));
                     break;
 
-                case 'quickpay_capture':
+                case 'unzer_capture':
                     if (!isset($_POST['amount_big']) || $_POST['amount_big'] == '' || $_POST['amount_big'] == 0) {
                         tep_redirect(tep_href_link(FILENAME_ORDERS, tep_get_all_get_params(array('tabaction')) . 'action=edit'));
                     }
-                    $result = get_quickpay_capture($oID, $amount);
+                    $result = get_unzer_capture($oID, $amount);
                     tep_redirect(tep_href_link(FILENAME_ORDERS, tep_get_all_get_params(array('tabaction')) . 'action=edit'));
                     break;
 
-                case 'quickpay_credit':
-                    $result = get_quickpay_credit($oID, $amount);
+                case 'unzer_credit':
+                    $result = get_unzer_credit($oID, $amount);
                     tep_redirect(tep_href_link(FILENAME_ORDERS, tep_get_all_get_params(array('tabaction')) . 'action=edit'));
                     break;
 

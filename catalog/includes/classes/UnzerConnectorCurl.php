@@ -11,14 +11,14 @@
  */
 
 /**
- * Quickpay v10+ php library
+ * Unzer v10+ php library
  *
- * This class implements the Quickpay connector interface, by using curl.
+ * This class implements the Unzer connector interface, by using curl.
  * If curl is not present in the environment an execption is thrown on instantiation.
  */
-class QPConnectorCurl implements QPConnectorInterface {
+class UnzerConnectorCurl implements UnzerConnectorInterface {
     protected $connTimeout = 10;
-    protected $apiUrl = "https://api.quickpay.net";
+    protected $apiUrl = "https://api.unzerdirect.com";
     protected $apiVersion = 'v10';
     protected $apiKey = "";
     protected $format = "application/json";

@@ -51,10 +51,10 @@ define('MODULE_AVAILABLE_CREDITCARDS',array(
     'vipps',
 ));
 
-include(DIR_FS_CATALOG.DIR_WS_CLASSES.'QuickpayApi.php');
-include(DIR_FS_CATALOG.DIR_WS_CLASSES.'QuickpayISO3166.php');
+include(DIR_FS_CATALOG.DIR_WS_CLASSES.'UnzerApi.php');
+include(DIR_FS_CATALOG.DIR_WS_CLASSES.'UnzerISO3166.php');
 
-class quickpay_advanced {
+class unzer_advanced {
 
     var $code, $title, $description, $enabled, $creditcardgroup, $num_groups;
 
@@ -63,15 +63,15 @@ class quickpay_advanced {
 
         if (isset($_POST['cardlock'])) $cardlock = $_POST['cardlock'];
 
-        $this->code = 'quickpay_advanced';
-        $this->title = MODULE_PAYMENT_QUICKPAY_ADVANCED_TEXT_TITLE;
-        $this->public_title = MODULE_PAYMENT_QUICKPAY_ADVANCED_TEXT_PUBLIC_TITLE;
-        $this->description = MODULE_PAYMENT_QUICKPAY_ADVANCED_TEXT_DESCRIPTION;
-        $this->sort_order = defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_SORT_ORDER') ? MODULE_PAYMENT_QUICKPAY_ADVANCED_SORT_ORDER : 0;
-        $this->enabled = (defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS') && MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS == 'True') ? (true) : (false);
+        $this->code = 'unzer_advanced';
+        $this->title = MODULE_PAYMENT_UNZER_ADVANCED_TEXT_TITLE;
+        $this->public_title = MODULE_PAYMENT_UNZER_ADVANCED_TEXT_PUBLIC_TITLE;
+        $this->description = MODULE_PAYMENT_UNZER_ADVANCED_TEXT_DESCRIPTION;
+        $this->sort_order = defined('MODULE_PAYMENT_UNZER_ADVANCED_SORT_ORDER') ? MODULE_PAYMENT_UNZER_ADVANCED_SORT_ORDER : 0;
+        $this->enabled = (defined('MODULE_PAYMENT_UNZER_ADVANCED_STATUS') && MODULE_PAYMENT_UNZER_ADVANCED_STATUS == 'True') ? (true) : (false);
         $this->creditcardgroup = array();
         $this->email_footer = ($cardlock == "viabill" || $cardlock == "viabill" ? DENUNCIATION : '');
-        $this->order_status = (defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_PREPARE_ORDER_STATUS_ID') && ((int)MODULE_PAYMENT_QUICKPAY_ADVANCED_PREPARE_ORDER_STATUS_ID > 0)) ? ((int)MODULE_PAYMENT_QUICKPAY_ADVANCED_PREPARE_ORDER_STATUS_ID) : (0);
+        $this->order_status = (defined('MODULE_PAYMENT_UNZER_ADVANCED_PREPARE_ORDER_STATUS_ID') && ((int)MODULE_PAYMENT_UNZER_ADVANCED_PREPARE_ORDER_STATUS_ID > 0)) ? ((int)MODULE_PAYMENT_UNZER_ADVANCED_PREPARE_ORDER_STATUS_ID) : (0);
 
         // CUSTOMIZE THIS SETTING FOR THE NUMBER OF PAYMENT GROUPS NEEDED
         $this->num_groups = 5;
@@ -82,21 +82,21 @@ class quickpay_advanced {
 
         // Store online payment options in local variable
         for ($i = 1; $i <= $this->num_groups; $i++) {
-            if (defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i) && constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i) != '') {
-                // if (!isset($this->creditcardgroup[constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_FEE')])) {
-                    // $this->creditcardgroup[constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_FEE')] = array();
+            if (defined('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i) && constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i) != '') {
+                // if (!isset($this->creditcardgroup[constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_FEE')])) {
+                    // $this->creditcardgroup[constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_FEE')] = array();
                 // }
-                $payment_options = preg_split('[\,\;]', constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i));
+                $payment_options = preg_split('[\,\;]', constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i));
                 foreach ($payment_options as $option) {
                     $msg .= $option;
-                    // $this->creditcardgroup[constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_FEE')][] = $option;
+                    // $this->creditcardgroup[constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_FEE')][] = $option;
                 }
             }
         }
 
         /** V10 */
-        if (("go" == $_POST['quickpayIT']) && !isset($_SESSION['qlink'])) {
-            $this->form_action_url = 'https://payment.quickpay.net/';
+        if (("go" == $_POST['unzerIT']) && !isset($_SESSION['qlink'])) {
+            $this->form_action_url = 'https://payment.unzerdirect.com/';
         } else {
             $this->form_action_url = tep_href_link(FILENAME_CHECKOUT_CONFIRMATION, '', 'SSL');
         }
@@ -104,11 +104,11 @@ class quickpay_advanced {
 
     /** Class methods */
     function update_status() {
-        global $order, $quickpay_fee, $HTTP_POST_VARS, $qp_card;
+        global $order, $unzer_fee, $HTTP_POST_VARS, $unzer_card;
 
-        if (($this->enabled == true) && defined('MODULE_PAYMENT_QUICKPAY_ZONE') && ((int) MODULE_PAYMENT_QUICKPAY_ZONE > 0)) {
+        if (($this->enabled == true) && defined('MODULE_PAYMENT_UNZER_ZONE') && ((int) MODULE_PAYMENT_UNZER_ZONE > 0)) {
             $check_flag = false;
-            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_QUICKPAY_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
+            $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_UNZER_ZONE . "' and zone_country_id = '" . $order->billing['country']['id'] . "' order by zone_id");
             while ($check = tep_db_fetch_array($check_query)) {
                 if ($check['zone_id'] < 1) {
                     $check_flag = true;
@@ -124,44 +124,44 @@ class quickpay_advanced {
             }
         }
 
-        if (!tep_session_is_registered('qp_card'))
-            tep_session_register('qp_card');
+        if (!tep_session_is_registered('unzer_card'))
+            tep_session_register('unzer_card');
 
-        if (isset($_POST['qp_card']))
-            $qp_card = $_POST['qp_card'];
+        if (isset($_POST['unzer_card']))
+            $unzer_card = $_POST['unzer_card'];
 
-        if (!tep_session_is_registered('cart_QuickPay_ID'))
-            tep_session_register('cart_QuickPay_ID');
+        if (!tep_session_is_registered('cart_Unzer_ID'))
+            tep_session_register('cart_Unzer_ID');
 
-        if (isset($_GET['cart_QuickPay_ID']))
-            $qp_card = $_GET['cart_QuickPay_ID'];
+        if (isset($_GET['cart_Unzer_ID']))
+            $unzer_card = $_GET['cart_Unzer_ID'];
 
-        if (!tep_session_is_registered('quickpay_fee')) {
-            tep_session_register('quickpay_fee');
+        if (!tep_session_is_registered('unzer_fee')) {
+            tep_session_register('unzer_fee');
         }
     }
 
     function javascript_validation() {
         $js = '  if (payment_value == "' . $this->code . '") {' . "\n" .
-              '      var qp_card_value = null;' . "\n" .
-              '      if (document.checkout_payment.qp_card.length) {' . "\n" .
-              '          for (var i=0; i<document.checkout_payment.qp_card.length; i++) {' . "\n" .
-              '              if (document.checkout_payment.qp_card[i].checked) {' . "\n" .
-              '                  qp_card_value = document.checkout_payment.qp_card[i].value;' . "\n" .
+              '      var unzer_card_value = null;' . "\n" .
+              '      if (document.checkout_payment.unzer_card.length) {' . "\n" .
+              '          for (var i=0; i<document.checkout_payment.unzer_card.length; i++) {' . "\n" .
+              '              if (document.checkout_payment.unzer_card[i].checked) {' . "\n" .
+              '                  unzer_card_value = document.checkout_payment.unzer_card[i].value;' . "\n" .
               '              }' . "\n" .
               '          }' . "\n" .
-              '      } else if (document.checkout_payment.qp_card.checked) {' . "\n" .
-              '          qp_card_value = document.checkout_payment.qp_card.value;' . "\n" .
-              '      } else if (document.checkout_payment.qp_card.value) {' . "\n" .
-              '          qp_card_value = document.checkout_payment.qp_card.value;' . "\n" .
-              '          document.checkout_payment.qp_card.checked=true;' . "\n" .
+              '      } else if (document.checkout_payment.unzer_card.checked) {' . "\n" .
+              '          unzer_card_value = document.checkout_payment.unzer_card.value;' . "\n" .
+              '      } else if (document.checkout_payment.unzer_card.value) {' . "\n" .
+              '          unzer_card_value = document.checkout_payment.unzer_card.value;' . "\n" .
+              '          document.checkout_payment.unzer_card.checked=true;' . "\n" .
               '      }' . "\n" .
-              '      if (qp_card_value == null) {' . "\n" .
-              '          error_message = error_message + "' . MODULE_PAYMENT_QUICKPAY_ADVANCED_TEXT_SELECT_CARD . '";' . "\n" .
+              '      if (unzer_card_value == null) {' . "\n" .
+              '          error_message = error_message + "' . MODULE_PAYMENT_UNZER_ADVANCED_TEXT_SELECT_CARD . '";' . "\n" .
               '          error = 1;' . "\n" .
               '      }' . "\n" .
               '      if (document.checkout_payment.cardlock.value == null) {' . "\n" .
-              '          error_message = error_message + "' . MODULE_PAYMENT_QUICKPAY_ADVANCED_TEXT_SELECT_CARD . '";' . "\n" .
+              '          error_message = error_message + "' . MODULE_PAYMENT_UNZER_ADVANCED_TEXT_SELECT_CARD . '";' . "\n" .
               '          error = 1;' . "\n" .
               '      }' . "\n" .
               '  }' . "\n";
@@ -170,12 +170,12 @@ class quickpay_advanced {
 
     /* Define payment method selector on checkout page */
     public function selection() {
-        global $order, $currencies, $qp_card, $cardlock;
+        global $order, $currencies, $unzer_card, $cardlock;
         $qty_groups = 0;
 
-        /** Count how many MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP are configured. */
+        /** Count how many MODULE_PAYMENT_UNZER_ADVANCED_GROUP are configured. */
         for ($i = 1; $i <= $this->num_groups; $i++) {
-            if (constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i) == '') {
+            if (constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i) == '') {
                 continue;
             }
 
@@ -187,21 +187,21 @@ class quickpay_advanced {
             $selection = array('id' => $this->code, 'module' => $this->title. tep_draw_hidden_field('cardlock', $cardlock ));
         }
 
-        /** Parse all the configured MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP */
+        /** Parse all the configured MODULE_PAYMENT_UNZER_ADVANCED_GROUP */
         $selection['fields'] = array();
         $msg = '<table width="100%"><tr><td>';
         $optscount=0;
         for ($i = 1; $i <= $this->num_groups; $i++) {
             $options_text = '';
-            if (defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i) && constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i) != '') {
-                $payment_options = preg_split('[\,\;]', constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i));
+            if (defined('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i) && constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i) != '') {
+                $payment_options = preg_split('[\,\;]', constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i));
 
                 foreach ($payment_options as $option) {
-                    $cost = (MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOFEE == "No" || $option == 'viabill' ? "0" : "1");
+                    $cost = (MODULE_PAYMENT_UNZER_ADVANCED_AUTOFEE == "No" || $option == 'viabill' ? "0" : "1");
                     if($option=="creditcard"){
                         $optscount++;
                         /** Read the logos defined on admin panel **/
-                        $cards = explode(";",MODULE_PAYMENT_QUICKPAY_CARD_LOGOS);
+                        $cards = explode(";",MODULE_PAYMENT_UNZER_CARD_LOGOS);
                         foreach ($cards as $optionc) {
                             $iconc = "";
                             if(file_exists(DIR_WS_ICONS.$optionc.".png")){
@@ -221,8 +221,8 @@ class quickpay_advanced {
                         }
 
                         /** Configuring the text to be shown for the payment group. If there is an input in the text field for that payment option, that value will be shown to the user, otherwise, the default value will be used.*/
-                        if(defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP'.$i.'_TEXT') && constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_TEXT') != ''){
-                            $msg .= constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_TEXT').'</td></tr></table>';
+                        if(defined('MODULE_PAYMENT_UNZER_ADVANCED_GROUP'.$i.'_TEXT') && constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_TEXT') != ''){
+                            $msg .= constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_TEXT').'</td></tr></table>';
                         }else {
                             $msg .= $this->get_payment_options_name($option).'</td></tr></table>';
                         }
@@ -234,8 +234,8 @@ class quickpay_advanced {
                             $selection = array(
                                 'id' => $this->code,
                                 'module' => '<table width="100%" border="0">
-                                                <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectQuickPayRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
-                                                    <td class="main" style="height:22px;vertical-align:middle;">' .$options_text.($cost !=0 ? '</td><td class="main" style="height:22px;vertical-align:middle;"> (+ '.MODULE_PAYMENT_QUICKPAY_ADVANCED_FEELOCKINFO.')' :'').'
+                                                <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectUnzerRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
+                                                    <td class="main" style="height:22px;vertical-align:middle;">' .$options_text.($cost !=0 ? '</td><td class="main" style="height:22px;vertical-align:middle;"> (+ '.MODULE_PAYMENT_UNZER_ADVANCED_FEELOCKINFO.')' :'').'
                                                         </td>
                                                 </tr>'.'
                                             </table>'.tep_draw_hidden_field('cardlock', $option));
@@ -244,16 +244,16 @@ class quickpay_advanced {
                         }else{
                             $selection['fields'][] = array(
                                 'title' => '<table width="100%" border="0">
-                                                <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectQuickPayRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
-                                                    <td class="main" style="height:22px;vertical-align:middle;">' . $options_text.($cost !=0 ? '</td><td style="height:22px;vertical-align:middle;">(+ '.MODULE_PAYMENT_QUICKPAY_ADVANCED_FEELOCKINFO.')' :'').'
+                                                <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectUnzerRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
+                                                    <td class="main" style="height:22px;vertical-align:middle;">' . $options_text.($cost !=0 ? '</td><td style="height:22px;vertical-align:middle;">(+ '.MODULE_PAYMENT_UNZER_ADVANCED_FEELOCKINFO.')' :'').'
                                                         </td>
                                                 </tr>'.'
                                             </table>',
                                 'field' => tep_draw_radio_field(
-                                    'qp_card',
+                                    'unzer_card',
                                     '',
                                     ($option==$cardlock ? true : false),
-                                    ' onClick="setQuickPay(); document.checkout_payment.cardlock.value = \''.$option.'\';" '
+                                    ' onClick="setUnzer(); document.checkout_payment.cardlock.value = \''.$option.'\';" '
                                 )
                             );
                         }/** end qty=1 */
@@ -304,8 +304,8 @@ class quickpay_advanced {
                                                     <td style="height: 27px;white-space:nowrap;vertical-align:middle;" >';
 
                             /** If there is an input in the text field for that payment option, that value will be shown to the user, otherwise, the default value will be used. */
-                            if(defined('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP'.$i.'_TEXT') && constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_TEXT') != ''){
-                                $options_text .= constant('MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_TEXT').'</td></tr></table>';
+                            if(defined('MODULE_PAYMENT_UNZER_ADVANCED_GROUP'.$i.'_TEXT') && constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_TEXT') != ''){
+                                $options_text .= constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_TEXT').'</td></tr></table>';
                             }else {
                                 $options_text .= $this->get_payment_options_name($option).'</td></tr></table>';
                             }
@@ -315,24 +315,24 @@ class quickpay_advanced {
                                 $selection = array(
                                     'id' => $this->code,
                                     'module' => '<table width="100%" border="0">
-                                                    <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectQuickPayRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
-                                                        <td class="main" style="height: 27px;white-space:nowrap;vertical-align:middle;">' .$options_text.($cost !=0 ? '</td><td style="height:22px;vertical-align:middle;"> (+ '.MODULE_PAYMENT_QUICKPAY_ADVANCED_FEELOCKINFO.')' :'').'
+                                                    <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectUnzerRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
+                                                        <td class="main" style="height: 27px;white-space:nowrap;vertical-align:middle;">' .$options_text.($cost !=0 ? '</td><td style="height:22px;vertical-align:middle;"> (+ '.MODULE_PAYMENT_UNZER_ADVANCED_FEELOCKINFO.')' :'').'
                                                             </td>
                                                     </tr>'.'
-                                                </table>'.tep_draw_hidden_field('cardlock', $option).tep_draw_hidden_field('qp_card', (isset($fees[1])) ? $fees[1] : '0'));
+                                                </table>'.tep_draw_hidden_field('cardlock', $option).tep_draw_hidden_field('unzer_card', (isset($fees[1])) ? $fees[1] : '0'));
                             }else{
                                 $selection['fields'][] = array(
                                     'title' => '<table width="100%" border="0">
-                                                    <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectQuickPayRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
-                                                        <td class="main" style="height: 27px;white-space:nowrap;vertical-align:middle;">' . $options_text.($cost !=0 ? '</td><td style="height:22px;vertical-align:middle;"> (+ '.MODULE_PAYMENT_QUICKPAY_ADVANCED_FEELOCKINFO.')' :'').'
+                                                    <tr class="moduleRow table-selection" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="selectUnzerRowEffect(this, ' . ($optscount-1) . ',\''.$option.'\')">
+                                                        <td class="main" style="height: 27px;white-space:nowrap;vertical-align:middle;">' . $options_text.($cost !=0 ? '</td><td style="height:22px;vertical-align:middle;"> (+ '.MODULE_PAYMENT_UNZER_ADVANCED_FEELOCKINFO.')' :'').'
                                                             </td>
                                                     </tr>'.'
                                                 </table>',
                                     'field' => tep_draw_radio_field(
-                                        'qp_card',
+                                        'unzer_card',
                                         '',
                                         ($option==$cardlock ? true : false),
-                                        ' onClick="setQuickPay();document.checkout_payment.cardlock.value = \''.$option.'\';" '
+                                        ' onClick="setUnzer();document.checkout_payment.cardlock.value = \''.$option.'\';" '
                                     )
                                 );
                             }
@@ -345,17 +345,17 @@ class quickpay_advanced {
         $js_function = '
             <script language="javascript"><!--
 
-                function setQuickPay() {
+                function setUnzer() {
                     var radioLength = document.checkout_payment.payment.length;
                     for(var i = 0; i < radioLength; i++) {
                         document.checkout_payment.payment[i].checked = false;
-                        if(document.checkout_payment.payment[i].value == "quickpay_advanced") {
+                        if(document.checkout_payment.payment[i].value == "unzer_advanced") {
                             document.checkout_payment.payment[i].checked = true;
                         }
                     }
                 }
 
-                function selectQuickPayRowEffect(object, buttonSelect, option) {
+                function selectUnzerRowEffect(object, buttonSelect, option) {
                     if (!selected) {
                         if (document.getElementById) {
                             selected = document.getElementById("defaultSelected");
@@ -369,13 +369,13 @@ class quickpay_advanced {
                     object.className = "moduleRowSelected";
                     selected = object;
                     document.checkout_payment.cardlock.value = option;
-                    document.checkout_payment.qp_card.checked = false;
-                    if (document.checkout_payment.qp_card[0]) {
-                        document.checkout_payment.qp_card[buttonSelect].checked=true;
+                    document.checkout_payment.unzer_card.checked = false;
+                    if (document.checkout_payment.unzer_card[0]) {
+                        document.checkout_payment.unzer_card[buttonSelect].checked=true;
                     } else {
-                        document.checkout_payment.qp_card.checked=true;
+                        document.checkout_payment.unzer_card.checked=true;
                     }
-                    setQuickPay();
+                    setUnzer();
                 }
 
                 document.addEventListener("DOMContentLoaded", function(){
@@ -385,7 +385,7 @@ class quickpay_advanced {
                       [node, node.parentElement.parentElement].forEach(item => {
                         /* When a payment method is selected deselect all subpayment methods */
                         item.addEventListener("click", function() {
-                            document.checkout_payment.qp_card.forEach(function(sub_node) {
+                            document.checkout_payment.unzer_card.forEach(function(sub_node) {
                                 sub_node.checked=false;
                             });
                         });
@@ -420,12 +420,12 @@ class quickpay_advanced {
 
 
     function confirmation($addorder=false) {
-        global $cartID, $cart_QuickPay_ID, $customer_id, $languages_id, $order, $order_total_modules, $oscTemplate;
-        $order_id = substr($cart_QuickPay_ID, strpos($cart_QuickPay_ID, '-') + 1);
+        global $cartID, $cart_Unzer_ID, $customer_id, $languages_id, $order, $order_total_modules, $oscTemplate;
+        $order_id = substr($cart_Unzer_ID, strpos($cart_Unzer_ID, '-') + 1);
 
         //do not create preparing order id before payment confirmation is chosen by customer
         $mode = false;
-        if(MODULE_PAYMENT_QUICKPAY_ADVANCED_MODE == "Before" || $_POST['callquickpay'] == "go"){
+        if(MODULE_PAYMENT_UNZER_ADVANCED_MODE == "Before" || $_POST['callunzer'] == "go"){
             $mode = true;
         }
 
@@ -582,8 +582,8 @@ class quickpay_advanced {
                 }
             }
             /// end checkout_process section
-            $cart_QuickPay_ID = $cartID . '-' . $insert_id;
-            tep_session_register('cart_QuickPay_ID');
+            $cart_Unzer_ID = $cartID . '-' . $insert_id;
+            tep_session_register('cart_Unzer_ID');
 
             //}
         }
@@ -667,7 +667,7 @@ EOT;
                 </td>
             </tr>
         </table>';
-        $fee_info = (MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOFEE =="Yes" && $_POST["cardlock"] !="viabill" ? MODULE_PAYMENT_QUICKPAY_ADVANCED_FEEINFO . '<br />' : '');
+        $fee_info = (MODULE_PAYMENT_UNZER_ADVANCED_AUTOFEE =="Yes" && $_POST["cardlock"] !="viabill" ? MODULE_PAYMENT_UNZER_ADVANCED_FEEINFO . '<br />' : '');
 
         return array('title' => $fee_info . $this->email_footer . $agree_terms);
 
@@ -678,76 +678,76 @@ EOT;
 
     /* Define payment button and data array to be sent */
     function process_button() {
-        global $_POST, $customer_id, $order, $currencies, $currency, $languages_id, $language, $cart_QuickPay_ID, $order_total_modules, $messageStack;
+        global $_POST, $customer_id, $order, $currencies, $currency, $languages_id, $language, $cart_Unzer_ID, $order_total_modules, $messageStack;
         /** collect all post fields and attach as hiddenfieds to button */
 
-        if ( !class_exists('quickpay_currencies') ) {
-            include(DIR_FS_CATALOG . DIR_WS_CLASSES . 'quickpay_currencies.php');
+        if ( !class_exists('unzer_currencies') ) {
+            include(DIR_FS_CATALOG . DIR_WS_CLASSES . 'unzer_currencies.php');
         }
-        if (!($currencies instanceof quickpay_currencies)) {
-            $currencies = new quickpay_currencies($currencies);
+        if (!($currencies instanceof unzer_currencies)) {
+            $currencies = new unzer_currencies($currencies);
         }
 
         $process_button_string = '';
         $process_parameters = null;
 
-        $qp_merchant_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_MERCHANTID;
-        $qp_agreement_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_AGGREEMENTID;
+        $unzer_merchant_id = MODULE_PAYMENT_UNZER_ADVANCED_MERCHANTID;
+        $unzer_agreement_id = MODULE_PAYMENT_UNZER_ADVANCED_AGGREEMENTID;
 
         /** TODO: dynamic language switching instead of hardcoded mapping */
-        $qp_language = "da";
+        $unzer_language = "da";
         switch ($language) {
-            case "english": $qp_language = "en";
+            case "english": $unzer_language = "en";
                 break;
-            case "swedish": $qp_language = "se";
+            case "swedish": $unzer_language = "se";
                 break;
-            case "norwegian": $qp_language = "no";
+            case "norwegian": $unzer_language = "no";
                 break;
-            case "german": $qp_language = "de";
+            case "german": $unzer_language = "de";
                 break;
-            case "french": $qp_language = "fr";
+            case "french": $unzer_language = "fr";
                 break;
         }
-        $qp_branding_id = "";
+        $unzer_branding_id = "";
 
-        $qp_subscription = (MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
-        $qp_cardtypelock = $_POST['cardlock'];
-        $qp_autofee = (MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOFEE == "No" || $qp_cardtypelock == 'viabill' ? "0" : "1");
-        $qp_description = "Merchant ".$qp_merchant_id." ".(MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "Authorize" : "Subscription");
-        $order_id = substr($cart_QuickPay_ID, strpos($cart_QuickPay_ID, '-') + 1);
-        $qp_order_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX.sprintf('%04d', $order_id);
+        $unzer_subscription = (MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
+        $unzer_cardtypelock = $_POST['cardlock'];
+        $unzer_autofee = (MODULE_PAYMENT_UNZER_ADVANCED_AUTOFEE == "No" || $unzer_cardtypelock == 'viabill' ? "0" : "1");
+        $unzer_description = "Merchant ".$unzer_merchant_id." ".(MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION == "Normal" ? "Authorize" : "Subscription");
+        $order_id = substr($cart_Unzer_ID, strpos($cart_Unzer_ID, '-') + 1);
+        $unzer_order_id = MODULE_PAYMENT_UNZER_ADVANCED_ORDERPREFIX.sprintf('%04d', $order_id);
         /** Calculate the total order amount for the order (the same way as in checkout_process.php) */
-        $qp_order_amount = 100 * $currencies->calculate($order->info['total'], true, $order->info['currency'], $order->info['currency_value'], '.', '');
-        $qp_currency_code = $order->info['currency'];
-        $qp_continueurl = tep_href_link(FILENAME_CHECKOUT_PROCESS, 'cart_QuickPay_ID='.$cart_QuickPay_ID, 'SSL');
-        $qp_cancelurl = tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL');
-        $qp_callbackurl = tep_href_link('callback10.php','oid='.$order_id,'SSL');
-        $qp_autocapture = (MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOCAPTURE == "No" ? "0" : "1");
-        $qp_version ="v10";
+        $unzer_order_amount = 100 * $currencies->calculate($order->info['total'], true, $order->info['currency'], $order->info['currency_value'], '.', '');
+        $unzer_currency_code = $order->info['currency'];
+        $unzer_continueurl = tep_href_link(FILENAME_CHECKOUT_PROCESS, 'cart_Unzer_ID='.$cart_Unzer_ID, 'SSL');
+        $unzer_cancelurl = tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL');
+        $unzer_callbackurl = tep_href_link('callback10.php','oid='.$order_id,'SSL');
+        $unzer_autocapture = (MODULE_PAYMENT_UNZER_ADVANCED_AUTOCAPTURE == "No" ? "0" : "1");
+        $unzer_version ="v10";
 
-        // $qp_apikey = MODULE_PAYMENT_QUICKPAY_ADVANCED_APIKEY;
-        // $qp_product_id = "P03";
-        // $qp_category = MODULE_PAYMENT_QUICKPAY_ADVANCED_PAII_CAT;
-        // $qp_reference_title = $qp_order_id;
-        // $qp_vat_amount = ($order->info['tax'] ? $order->info['tax'] : "0.00");
+        // $unzer_apikey = MODULE_PAYMENT_UNZER_ADVANCED_APIKEY;
+        // $unzer_product_id = "P03";
+        // $unzer_category = MODULE_PAYMENT_UNZER_ADVANCED_PAII_CAT;
+        // $unzer_reference_title = $unzer_order_id;
+        // $unzer_vat_amount = ($order->info['tax'] ? $order->info['tax'] : "0.00");
 
 
         //custom vars
         $process_parameters = [
-            'agreement_id' => $qp_agreement_id,
-            'amount' => $qp_order_amount,
-            'autocapture' => $qp_autocapture,
-            'autofee' => $qp_autofee,
-            'callbackurl' => $qp_callbackurl,
-            'cancelurl' => $qp_cancelurl,
-            'continueurl' => $qp_continueurl,
-            'currency' => $qp_currency_code,
-            'description' => $qp_description,
-            'language' => $qp_language,
-            'merchant_id' => $qp_merchant_id,
-            'order_id' => $qp_order_id,
-            'payment_methods' => $qp_cardtypelock,
-            'subscription' => $qp_subscription,
+            'agreement_id' => $unzer_agreement_id,
+            'amount' => $unzer_order_amount,
+            'autocapture' => $unzer_autocapture,
+            'autofee' => $unzer_autofee,
+            'callbackurl' => $unzer_callbackurl,
+            'cancelurl' => $unzer_cancelurl,
+            'continueurl' => $unzer_continueurl,
+            'currency' => $unzer_currency_code,
+            'description' => $unzer_description,
+            'language' => $unzer_language,
+            'merchant_id' => $unzer_merchant_id,
+            'order_id' => $unzer_order_id,
+            'payment_methods' => $unzer_cardtypelock,
+            'subscription' => $unzer_subscription,
             'version' => 'v10',
 
             'invoice_address' => [
@@ -760,7 +760,7 @@ EOT;
                 'city' => (isset($order->billing['city'])) ? ($order->billing['city']) : (''),
                 'zip_code' => (isset($order->billing['postcode'])) ? ($order->billing['postcode']) : (''),
                 'region' => (isset($order->billing['state'])) ? ($order->billing['state']): (''),
-                'country_code' => QuickpayISO3166::alpha3($order->billing['country']['title']),
+                'country_code' => UnzerISO3166::alpha3($order->billing['country']['title']),
                 'vat_no' => '',
                 'phone_number' => '',
                 'mobile_number' => (isset($order->customer['telephone'])) ? ($order->customer['telephone']) : (''),
@@ -777,7 +777,7 @@ EOT;
                 'city' => (isset($order->delivery['city'])) ? ($order->delivery['city']) : (''),
                 'zip_code' => (isset($order->delivery['postcode'])) ? ($order->delivery['postcode']) : (''),
                 'region' => (isset($order->delivery['state'])) ? ($order->delivery['state']) : (''),
-                'country_code' => QuickpayISO3166::alpha3($order->delivery['country']['title']),
+                'country_code' => UnzerISO3166::alpha3($order->delivery['country']['title']),
                 'vat_no' => '',
                 'phone_number' => '',
                 'mobile_number' => (isset($order->customer['telephone'])) ? ($order->customer['telephone']) : (''),
@@ -802,22 +802,22 @@ EOT;
             ];
         }
 
-        if("go" == $_POST['callquickpay']) {
-            $apiorder = new QuickpayApi();
-            $apiorder->setOptions(MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY);
+        if("go" == $_POST['callunzer']) {
+            $apiorder = new UnzerApi();
+            $apiorder->setOptions(MODULE_PAYMENT_UNZER_ADVANCED_USERAPIKEY);
 
             /** Set status request mode */
-            $mode = (("Normal" == MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION) ? ("") : ("1"));
+            $mode = (("Normal" == MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION) ? ("") : ("1"));
 
             /** Set to create/update mode */
-            $apiorder->mode = (("Normal" == MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION) ? ("payments/") : ("subscriptions/"));
+            $apiorder->mode = (("Normal" == MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION) ? ("payments/") : ("subscriptions/"));
 
             /** Check if order exists. */
             $qid = null;
-            $exists = $this->get_quickpay_order_status($order_id, $mode);
+            $exists = $this->get_unzer_order_status($order_id, $mode);
             if (null == $exists["qid"]) {
-                /** Create new quickpay order */
-                $storder = $apiorder->createorder($qp_order_id, $qp_currency_code, $process_parameters);
+                /** Create new unzer order */
+                $storder = $apiorder->createorder($unzer_order_id, $unzer_currency_code, $process_parameters);
                 $qid = $storder["id"];
             } else {
                 $qid = $exists["qid"];
@@ -826,14 +826,14 @@ EOT;
             $storder = $apiorder->link($qid, $process_parameters);
 
             if (substr($storder['url'], 0, 5) <> 'https') {
-                $messageStack->add_session(MODULE_PAYMENT_QUICKPAY_ADVANCED_ERROR_COMMUNICATION_FAILURE, 'error');
+                $messageStack->add_session(MODULE_PAYMENT_UNZER_ADVANCED_ERROR_COMMUNICATION_FAILURE, 'error');
                 tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL'));
             }
 
             $process_button_string .= "<script>window.location.replace('" . $storder['url'] . "');</script>";
         }
 
-        $process_button_string .=  "<input type='hidden' value='go' name='callquickpay' />" . "\n".
+        $process_button_string .=  "<input type='hidden' value='go' name='callunzer' />" . "\n".
                                    "<input type='hidden' value='" . $_POST['cardlock'] . "' name='cardlock' />";
 
         return $process_button_string;
@@ -843,24 +843,24 @@ EOT;
     function before_process() {
         /** Called in FILENAME_CHECKOUT_PROCESS */
         /** check if order is approved by callback */
-        global $customer_id, $order, $order_id, $order_totals, $order_total_modules, $sendto, $billto, $languages_id, $payment, $currencies, $cart, $cart_QuickPay_ID;
+        global $customer_id, $order, $order_id, $order_totals, $order_total_modules, $sendto, $billto, $languages_id, $payment, $currencies, $cart, $cart_Unzer_ID;
 
-        $order_id = substr($cart_QuickPay_ID, strpos($cart_QuickPay_ID, '-') + 1);
+        $order_id = substr($cart_Unzer_ID, strpos($cart_Unzer_ID, '-') + 1);
 
-        $order_status_approved_id = (MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDER_STATUS_ID > 0 ? (int) MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDER_STATUS_ID : (int) DEFAULT_ORDERS_STATUS_ID);
+        $order_status_approved_id = (MODULE_PAYMENT_UNZER_ADVANCED_ORDER_STATUS_ID > 0 ? (int) MODULE_PAYMENT_UNZER_ADVANCED_ORDER_STATUS_ID : (int) DEFAULT_ORDERS_STATUS_ID);
 
-        $mode = (MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
-        $checkorderid = $this->get_quickpay_order_status($order_id, $mode);
+        $mode = (MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
+        $checkorderid = $this->get_unzer_order_status($order_id, $mode);
         if($checkorderid["oid"] != $order_id){
             tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL'));
 
         }
 
-        if ( !class_exists('quickpay_order') ) {
-            include(DIR_FS_CATALOG . DIR_WS_CLASSES . 'quickpay_order.php');
+        if ( !class_exists('unzer_order') ) {
+            include(DIR_FS_CATALOG . DIR_WS_CLASSES . 'unzer_order.php');
         }
-        if (!($order instanceof quickpay_order)) {
-            $order = new quickpay_order($order);
+        if (!($order instanceof unzer_order)) {
+            $order = new unzer_order($order);
         }
 
         /** For debugging with FireBug / FirePHP */
@@ -1010,9 +1010,9 @@ EOT;
 
         tep_session_unregister('cardlock');
         tep_session_unregister('order_id');
-        tep_session_unregister('quickpay_fee');
-        tep_session_unregister('qp_card');
-        tep_session_unregister('cart_QuickPay_ID');
+        tep_session_unregister('unzer_fee');
+        tep_session_unregister('unzer_card');
+        tep_session_unregister('cart_Unzer_ID');
         tep_session_unregister('qlink');
 
         tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));
@@ -1020,18 +1020,18 @@ EOT;
 
 
     function get_error() {
-        global $cart_QuickPay_ID, $order, $currencies;
-        $order_id = substr($cart_QuickPay_ID, strpos($cart_QuickPay_ID, '-') + 1);;
+        global $cart_Unzer_ID, $order, $currencies;
+        $order_id = substr($cart_Unzer_ID, strpos($cart_Unzer_ID, '-') + 1);;
 
-        if ( !class_exists('quickpay_currencies') ) {
-            include(DIR_FS_CATALOG . DIR_WS_CLASSES . 'quickpay_currencies.php');
+        if ( !class_exists('unzer_currencies') ) {
+            include(DIR_FS_CATALOG . DIR_WS_CLASSES . 'unzer_currencies.php');
         }
-        if (!($currencies instanceof quickpay_currencies)) {
-            $currencies = new quickpay_currencies($currencies);
+        if (!($currencies instanceof unzer_currencies)) {
+            $currencies = new unzer_currencies($currencies);
         }
 
-        $error_desc = MODULE_PAYMENT_QUICKPAY_ADVANCED_ERROR_CANCELLED;
-        $error = array('title' => MODULE_PAYMENT_QUICKPAY_ADVANCED_TEXT_ERROR, 'error' => $error_desc);
+        $error_desc = MODULE_PAYMENT_UNZER_ADVANCED_ERROR_CANCELLED;
+        $error = array('title' => MODULE_PAYMENT_UNZER_ADVANCED_TEXT_ERROR, 'error' => $error_desc);
 
 
         //avoid order number already used: create a payment link if payment window was aborted
@@ -1039,17 +1039,17 @@ EOT;
         /*if(!$_SESSION["qlink"])    {
         try {
 
-                    $apiorder= new QuickpayApi();
-            $apiorder->setOptions(MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY);
-            //$api->mode = 'payments?currency='.$qp_currency_code.'&order_id='.
-        $qp_order_id = MODULE_PAYMENT_QUICKPAY_ADVANCED_AGGREEMENTID."_".sprintf('%04d', $order_id);
-        $mode = (MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
-        $exists = $this->get_quickpay_order_status($order_id, $mode);
+                    $apiorder= new UnzerApi();
+            $apiorder->setOptions(MODULE_PAYMENT_UNZER_ADVANCED_USERAPIKEY);
+            //$api->mode = 'payments?currency='.$unzer_currency_code.'&order_id='.
+        $unzer_order_id = MODULE_PAYMENT_UNZER_ADVANCED_AGGREEMENTID."_".sprintf('%04d', $order_id);
+        $mode = (MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION == "Normal" ? "" : "1");
+        $exists = $this->get_unzer_order_status($order_id, $mode);
 
         if($exists["qid"] == null){
 
-        //create new quickpay order
-        $storder = $apiorder->createorder($qp_order_id, $order->info['currency']);
+        //create new unzer order
+        $storder = $apiorder->createorder($unzer_order_id, $order->info['currency']);
         $qid = $storder["id"];
 
         }else{
@@ -1066,7 +1066,7 @@ EOT;
 
 
         } catch (Exception $e) {
-        $err .= 'QuickPay Status: ';
+        $err .= 'Unzer Status: ';
                     // An error occured with the status request
             $err .= 'Problem: ' . $this->json_message_front($e->getMessage()) ;
                 //  tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL'));
@@ -1087,7 +1087,7 @@ EOT;
 
     function check() {
         if (!isset($this->_check)) {
-            $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS'");
+            $check_query = tep_db_query("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_UNZER_ADVANCED_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
         return $this->_check;
@@ -1111,8 +1111,8 @@ EOT;
         }
         tep_db_query("ALTER TABLE  " . TABLE_ORDERS . " CHANGE  cc_expires  cc_expires VARCHAR( 8 )  NULL DEFAULT NULL");
 
-        // new status for quickpay prepare orders
-        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Quickpay [preparing]' limit 1");
+        // new status for unzer prepare orders
+        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Unzer [preparing]' limit 1");
 
         if (tep_db_num_rows($check_query) < 1) {
             $status_query = tep_db_query("select max(orders_status_id) as status_id from " . TABLE_ORDERS_STATUS);
@@ -1123,7 +1123,7 @@ EOT;
             $languages = tep_get_languages();
 
             for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-                tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_id . "', '" . $languages[$i]['id'] . "', 'Quickpay [preparing]')");
+                tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_id . "', '" . $languages[$i]['id'] . "', 'Unzer [preparing]')");
             }
         } else {
             $check = tep_db_fetch_array($check_query);
@@ -1136,8 +1136,8 @@ EOT;
         }
 
 
-        // new status for quickpay rejected orders
-        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Quickpay [rejected]' limit 1");
+        // new status for unzer rejected orders
+        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Unzer [rejected]' limit 1");
 
         if (tep_db_num_rows($check_query) < 1) {
             $status_query = tep_db_query("select max(orders_status_id) as status_id from " . TABLE_ORDERS_STATUS);
@@ -1148,7 +1148,7 @@ EOT;
             $languages = tep_get_languages();
 
             for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-                tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_rejected_id . "', '" . $languages[$i]['id'] . "', 'Quickpay [rejected]')");
+                tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_rejected_id . "', '" . $languages[$i]['id'] . "', 'Unzer [rejected]')");
             }
 
         } else {
@@ -1162,8 +1162,8 @@ EOT;
             tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_rejected_id . "'");
         }
 
-        // new status for quickpay pending orders
-        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Pending [Quickpay approved]' limit 1");
+        // new status for unzer pending orders
+        $check_query = tep_db_query("select orders_status_id from " . TABLE_ORDERS_STATUS . " where orders_status_name = 'Pending [Unzer approved]' limit 1");
 
         if (tep_db_num_rows($check_query) < 1) {
             $status_query = tep_db_query("select max(orders_status_id) as status_id from " . TABLE_ORDERS_STATUS);
@@ -1174,7 +1174,7 @@ EOT;
             $languages = tep_get_languages();
 
             for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-                tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_pending_id . "', '" . $languages[$i]['id'] . "', 'Pending [Quickpay approved]')");
+                tep_db_query("insert into " . TABLE_ORDERS_STATUS . " (orders_status_id, language_id, orders_status_name) values ('" . $status_pending_id . "', '" . $languages[$i]['id'] . "', 'Pending [Unzer approved]')");
             }
         } else {
             $check = tep_db_fetch_array($check_query);
@@ -1187,64 +1187,64 @@ EOT;
             tep_db_query("update " . TABLE_ORDERS_STATUS . " set public_flag = 1 and downloads_flag = 0 where orders_status_id = '" . $status_pending_id . "'");
         }
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable quickpay_advanced', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS', 'False', 'Do you want to accept quickpay payments?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable unzer_advanced', 'MODULE_PAYMENT_UNZER_ADVANCED_STATUS', 'False', 'Do you want to accept unzer payments?', '6', '3', 'tep_cfg_select_option(array(\'True\', \'False\'), ', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Preparing orders mode', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_MODE', 'Normal', 'Choose  mode:<br><b>Normal:</b> Create when payment window is opened.<br><b>Before:</b> Create when confirmation page is opened', '6', '3', 'tep_cfg_select_option(array(\'Normal\', \'Before\'), ', now())");
-
-
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
-
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Quickpay Merchant Id', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_MERCHANTID', '', 'Enter Merchant id', '6', '6', now())");
-
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Quickpay Window user Agreement Id', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_AGGREEMENTID', '', 'Enter Window user Agreement id', '6', '6', now())");
-
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Order number prefix', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX', '000', 'Enter prefix (Ordernumbers Must contain at least 3 characters)<br>Please Note: if upgrading from previous versions of Quickpay 10, use format \"Window Agreement ID_\" ex. 1234_ if \"old\" orders statuses  are to be displayed in your order admin.<br>', '6', '6', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Preparing orders mode', 'MODULE_PAYMENT_UNZER_ADVANCED_MODE', 'Normal', 'Choose  mode:<br><b>Normal:</b> Create when payment window is opened.<br><b>Before:</b> Create when confirmation page is opened', '6', '3', 'tep_cfg_select_option(array(\'Normal\', \'Before\'), ', now())");
 
 
-        // tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Set Private key for your Quickpay Payment Gateway', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_PRIVATEKEY', '', 'Enter your Private key.', '6', '6', now())");
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API USER KEY', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY', '', 'Used for payments, and for handling transactions from your backend order page.', '6', '6', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_UNZER_ADVANCED_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Subscription payment', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION', 'Normal', 'Set Subscription payment as default (normal is single payment).', '6', '0', 'tep_cfg_select_option(array(\'Normal\', \'Subscription\'), ',now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Unzer Merchant Id', 'MODULE_PAYMENT_UNZER_ADVANCED_MERCHANTID', '', 'Enter Merchant id', '6', '6', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Autofee', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOFEE', 'No', 'Does customer pay the cardfee?<br>Set fees in <a href=\"https://manage.quickpay.net/\" target=\"_blank\"><u>Quickpay manager</u></a>', '6', '0', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ',now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Unzer Window user Agreement Id', 'MODULE_PAYMENT_UNZER_ADVANCED_AGGREEMENTID', '', 'Enter Window user Agreement id', '6', '6', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Autocapture', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOCAPTURE', 'No', 'Use autocapture?', '6', '0', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ',now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Order number prefix', 'MODULE_PAYMENT_UNZER_ADVANCED_ORDERPREFIX', '000', 'Enter prefix (Ordernumbers Must contain at least 3 characters)<br>Please Note: if upgrading from previous versions of Unzer 10, use format \"Window Agreement ID_\" ex. 1234_ if \"old\" orders statuses  are to be displayed in your order admin.<br>', '6', '6', now())");
+
+
+        // tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Set Private key for your Unzer Payment Gateway', 'MODULE_PAYMENT_UNZER_ADVANCED_PRIVATEKEY', '', 'Enter your Private key.', '6', '6', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('API USER KEY', 'MODULE_PAYMENT_UNZER_ADVANCED_USERAPIKEY', '', 'Used for payments, and for handling transactions from your backend order page.', '6', '6', now())");
+
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Subscription payment', 'MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION', 'Normal', 'Set Subscription payment as default (normal is single payment).', '6', '0', 'tep_cfg_select_option(array(\'Normal\', \'Subscription\'), ',now())");
+
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Autofee', 'MODULE_PAYMENT_UNZER_ADVANCED_AUTOFEE', 'No', 'Does customer pay the cardfee?<br>Set fees in <a href=\"https://insights.unzerdirect.com/\" target=\"_blank\"><u>Unzer manager</u></a>', '6', '0', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ',now())");
+
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Autocapture', 'MODULE_PAYMENT_UNZER_ADVANCED_AUTOCAPTURE', 'No', 'Use autocapture?', '6', '0', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ',now())");
 
         for ($i = 1; $i <= $this->num_groups; $i++) {
             if($i==1){
                 $defaultlock='viabill';
-                // $qp_groupfee = '0:0';
+                // $unzer_groupfee = '0:0';
             }else if($i==2){
                 $defaultlock='creditcard';
-                // $qp_groupfee = '0:0';
+                // $unzer_groupfee = '0:0';
             }else{
                 $defaultlock='';
-                // $qp_groupfee ='0:0';
+                // $unzer_groupfee ='0:0';
             }
 
-            $qp_group = (defined('MODULE_PAYMENT_QUICKPAY_GROUP' . $i)) ? constant('MODULE_PAYMENT_QUICKPAY_GROUP' . $i) : $defaultlock;
+            $unzer_group = (defined('MODULE_PAYMENT_UNZER_GROUP' . $i)) ? constant('MODULE_PAYMENT_UNZER_GROUP' . $i) : $defaultlock;
 
-            // $qp_groupfee = (defined('MODULE_PAYMENT_QUICKPAY_GROUP' . $i . '_FEE')) ? constant('MODULE_PAYMENT_QUICKPAY_GROUP' . $i . '_FEE') : $qp_groupfee;
+            // $unzer_groupfee = (defined('MODULE_PAYMENT_UNZER_GROUP' . $i . '_FEE')) ? constant('MODULE_PAYMENT_UNZER_GROUP' . $i . '_FEE') : $unzer_groupfee;
 
-            tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Group " . $i . " Payment Options ', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP" . $i . "', '" . $qp_group . "', 'Comma seperated Quickpay payment options that are included in Group " . $i . ", maximum 255 chars (<a href=\'http://tech.quickpay.net/appendixes/payment-methods\' target=\'_blank\'><u>available options</u></a>)<br>Example: creditcard OR viabill OR dankort<br>', '6', '6', now())");
+            tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Group " . $i . " Payment Options ', 'MODULE_PAYMENT_UNZER_ADVANCED_GROUP" . $i . "', '" . $unzer_group . "', 'Comma seperated Unzer payment options that are included in Group " . $i . ", maximum 255 chars (<a href=\'http://unzerdirect.com/documentation/appendixes/payment-methods\' target=\'_blank\'><u>available options</u></a>)<br>Example: creditcard OR viabill OR dankort<br>', '6', '6', now())");
 
-            tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Group " . $i . " Payment Text ', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP" . $i . "_TEXT', '" . "" . "', 'Define text to be displayed for Group " . $i . " Payment Option. If this is not defined, the default text will be shown.<br>', '6', '6', now())");
+            tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Group " . $i . " Payment Text ', 'MODULE_PAYMENT_UNZER_ADVANCED_GROUP" . $i . "_TEXT', '" . "" . "', 'Define text to be displayed for Group " . $i . " Payment Option. If this is not defined, the default text will be shown.<br>', '6', '6', now())");
 
-            // tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Group " . $i . " Payments fee', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP" . $i . "_FEE', '" . $qp_groupfee . "', 'Fee for Group " . $i . " payments (fixed fee:percentage fee)<br>Example: <b>1.45:0.10</b>', '6', '6', now())");
+            // tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Group " . $i . " Payments fee', 'MODULE_PAYMENT_UNZER_ADVANCED_GROUP" . $i . "_FEE', '" . $unzer_groupfee . "', 'Fee for Group " . $i . " payments (fixed fee:percentage fee)<br>Example: <b>1.45:0.10</b>', '6', '6', now())");
         }
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_UNZER_ADVANCED_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '0', now())");
 
         // new settings
-        // tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Paii shop category', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_PAII_CAT','', 'Shop category must be set, if using Paii cardlock (paii), ', '6', '0','tep_cfg_pull_down_paii_list(', now())");
+        // tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Paii shop category', 'MODULE_PAYMENT_UNZER_ADVANCED_PAII_CAT','', 'Shop category must be set, if using Paii cardlock (paii), ', '6', '0','tep_cfg_pull_down_paii_list(', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Preparing Order Status', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_PREPARE_ORDER_STATUS_ID', '" . $status_id . "', 'Set the status of prepared orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Preparing Order Status', 'MODULE_PAYMENT_UNZER_ADVANCED_PREPARE_ORDER_STATUS_ID', '" . $status_id . "', 'Set the status of prepared orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Quickpay Acknowledged Order Status', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDER_STATUS_ID', '" . $status_pending_id . "', 'Set the status of orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Unzer Acknowledged Order Status', 'MODULE_PAYMENT_UNZER_ADVANCED_ORDER_STATUS_ID', '" . $status_pending_id . "', 'Set the status of orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Quickpay Rejected Order Status', 'MODULE_PAYMENT_QUICKPAY_ADVANCED_REJECTED_ORDER_STATUS_ID', '" . $status_rejected_id . "', 'Set the status of rejected orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, use_function, date_added) values ('Set Unzer Rejected Order Status', 'MODULE_PAYMENT_UNZER_ADVANCED_REJECTED_ORDER_STATUS_ID', '" . $status_rejected_id . "', 'Set the status of rejected orders made with this payment module to this value', '6', '0', 'tep_cfg_pull_down_order_statuses(', 'tep_get_order_status_name', now())");
 
-        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Credit Card Logos', 'MODULE_PAYMENT_QUICKPAY_CARD_LOGOS', '".implode(";",MODULE_AVAILABLE_CREDITCARDS)."', 'Images related to Credit Card Payment Method. Drag & Drop to change the visibility/order', '4', '0', 'show_logos', 'edit_logos(', now())");
+        tep_db_query("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Credit Card Logos', 'MODULE_PAYMENT_UNZER_CARD_LOGOS', '".implode(";",MODULE_AVAILABLE_CREDITCARDS)."', 'Images related to Credit Card Payment Method. Drag & Drop to change the visibility/order', '4', '0', 'show_logos', 'edit_logos(', now())");
 
     }
 
@@ -1256,30 +1256,30 @@ EOT;
 
     function keys() {
         $keys = array(
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_STATUS',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_ZONE',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_SORT_ORDER',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_MERCHANTID',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_AGGREEMENTID',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_PREPARE_ORDER_STATUS_ID',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDER_STATUS_ID',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_REJECTED_ORDER_STATUS_ID',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_SUBSCRIPTION',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOFEE',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_AUTOCAPTURE',
-            'MODULE_PAYMENT_QUICKPAY_ADVANCED_MODE',
-            'MODULE_PAYMENT_QUICKPAY_CARD_LOGOS',
+            'MODULE_PAYMENT_UNZER_ADVANCED_STATUS',
+            'MODULE_PAYMENT_UNZER_ADVANCED_ZONE',
+            'MODULE_PAYMENT_UNZER_ADVANCED_SORT_ORDER',
+            'MODULE_PAYMENT_UNZER_ADVANCED_MERCHANTID',
+            'MODULE_PAYMENT_UNZER_ADVANCED_AGGREEMENTID',
+            'MODULE_PAYMENT_UNZER_ADVANCED_USERAPIKEY',
+            'MODULE_PAYMENT_UNZER_ADVANCED_ORDERPREFIX',
+            'MODULE_PAYMENT_UNZER_ADVANCED_PREPARE_ORDER_STATUS_ID',
+            'MODULE_PAYMENT_UNZER_ADVANCED_ORDER_STATUS_ID',
+            'MODULE_PAYMENT_UNZER_ADVANCED_REJECTED_ORDER_STATUS_ID',
+            'MODULE_PAYMENT_UNZER_ADVANCED_SUBSCRIPTION',
+            'MODULE_PAYMENT_UNZER_ADVANCED_AUTOFEE',
+            'MODULE_PAYMENT_UNZER_ADVANCED_AUTOCAPTURE',
+            'MODULE_PAYMENT_UNZER_ADVANCED_MODE',
+            'MODULE_PAYMENT_UNZER_CARD_LOGOS',
         );
 
         for ($i = 1; $i <= $this->num_groups; $i++) {
-            $keys[] = 'MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i;
+            $keys[] = 'MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i;
 
-            $keys[] = 'MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP'. $i. '_TEXT';
+            $keys[] = 'MODULE_PAYMENT_UNZER_ADVANCED_GROUP'. $i. '_TEXT';
 
 
-            // $keys[] = 'MODULE_PAYMENT_QUICKPAY_ADVANCED_GROUP' . $i . '_FEE';
+            // $keys[] = 'MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_FEE';
         }
 
         return $keys;
@@ -1296,68 +1296,68 @@ EOT;
 
 
     function get_order_fee() {
-        global $_POST, $order, $currencies, $quickpay_fee;
-        $quickpay_fee = 0.0;
-        if (isset($_POST['qp_card']) && strpos($_POST['qp_card'], ":")) {
-            $quickpay_fee = $this->calculate_order_fee($order->info['total'], $_POST['qp_card']);
+        global $_POST, $order, $currencies, $unzer_fee;
+        $unzer_fee = 0.0;
+        if (isset($_POST['unzer_card']) && strpos($_POST['unzer_card'], ":")) {
+            $unzer_fee = $this->calculate_order_fee($order->info['total'], $_POST['unzer_card']);
         }
     }
 
 
     function get_payment_options_name($payment_option) {
         switch ($payment_option) {
-            case 'creditcard': return MODULE_PAYMENT_QUICKPAY_ADVANCED_CREDITCARD_TEXT;
+            case 'creditcard': return MODULE_PAYMENT_UNZER_ADVANCED_CREDITCARD_TEXT;
 
-            case '3d-dankort': return MODULE_PAYMENT_QUICKPAY_ADVANCED_DANKORT_3D_TEXT;
-            case '3d-jcb': return MODULE_PAYMENT_QUICKPAY_ADVANCED_JCB_3D_TEXT;
-            case '3d-visa': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_3D_TEXT;
-            case '3d-visa-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_DK_3D_TEXT;
-            case '3d-visa-electron': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_ELECTRON_3D_TEXT;
-            case '3d-visa-electron-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_ELECTRON_DK_3D_TEXT;
-            case '3d-visa-debet': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_DEBET_3D_TEXT;
-            case '3d-visa-debet-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_DEBET_DK_3D_TEXT;
-            case '3d-maestro': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MAESTRO_3D_TEXT;
-            case '3d-maestro-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MAESTRO_DK_3D_TEXT;
-            case '3d-mastercard': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_3D_TEXT;
-            case '3d-mastercard-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_DK_3D_TEXT;
-            case '3d-mastercard-debet': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_DEBET_3D_TEXT;
-            case '3d-mastercard-debet-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_DEBET_DK_3D_TEXT;
-            case '3d-creditcard': return MODULE_PAYMENT_QUICKPAY_ADVANCED_CREDITCARD_3D_TEXT;
-            case 'mastercard': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_TEXT;
-            case 'mastercard-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_DK_TEXT;
-            case 'mastercard-debet': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_DEBET_TEXT;
-            case 'mastercard-debet-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MASTERCARD_DEBET_DK_TEXT;
-            case 'american-express': return MODULE_PAYMENT_QUICKPAY_ADVANCED_AMERICAN_EXPRESS_TEXT;
-            case 'american-express-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_AMERICAN_EXPRESS_DK_TEXT;
-            case 'dankort': return MODULE_PAYMENT_QUICKPAY_ADVANCED_DANKORT_TEXT;
-            case 'diners': return MODULE_PAYMENT_QUICKPAY_ADVANCED_DINERS_TEXT;
-            case 'diners-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_DINERS_DK_TEXT;
-            case 'jcb': return MODULE_PAYMENT_QUICKPAY_ADVANCED_JCB_TEXT;
-            case 'visa': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_TEXT;
-            case 'visa-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_DK_TEXT;
-            case 'visa-electron': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_ELECTRON_TEXT;
-            case 'visa-electron-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VISA_ELECTRON_DK_TEXT;
-            case 'viabill': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VIABILL_TEXT;
-            case 'fbg1886': return MODULE_PAYMENT_QUICKPAY_ADVANCED_FBG1886_TEXT;
-            case 'paypal': return MODULE_PAYMENT_QUICKPAY_ADVANCED_PAYPAL_TEXT;
-            case 'sofort': return MODULE_PAYMENT_QUICKPAY_ADVANCED_SOFORT_TEXT;
-            case 'mobilepay': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MOBILEPAY_TEXT;
-            case 'bitcoin': return MODULE_PAYMENT_QUICKPAY_ADVANCED_BITCOIN_TEXT;
-            case 'swish': return MODULE_PAYMENT_QUICKPAY_ADVANCED_SWISH_TEXT;
-            case 'trustly': return MODULE_PAYMENT_QUICKPAY_ADVANCED_TRUSTLY_TEXT;
-            case 'klarna': return MODULE_PAYMENT_QUICKPAY_ADVANCED_KLARNA_TEXT;
+            case '3d-dankort': return MODULE_PAYMENT_UNZER_ADVANCED_DANKORT_3D_TEXT;
+            case '3d-jcb': return MODULE_PAYMENT_UNZER_ADVANCED_JCB_3D_TEXT;
+            case '3d-visa': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_3D_TEXT;
+            case '3d-visa-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DK_3D_TEXT;
+            case '3d-visa-electron': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_3D_TEXT;
+            case '3d-visa-electron-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_DK_3D_TEXT;
+            case '3d-visa-debet': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DEBET_3D_TEXT;
+            case '3d-visa-debet-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DEBET_DK_3D_TEXT;
+            case '3d-maestro': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_3D_TEXT;
+            case '3d-maestro-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_DK_3D_TEXT;
+            case '3d-mastercard': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_3D_TEXT;
+            case '3d-mastercard-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DK_3D_TEXT;
+            case '3d-mastercard-debet': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_3D_TEXT;
+            case '3d-mastercard-debet-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_DK_3D_TEXT;
+            case '3d-creditcard': return MODULE_PAYMENT_UNZER_ADVANCED_CREDITCARD_3D_TEXT;
+            case 'mastercard': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_TEXT;
+            case 'mastercard-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DK_TEXT;
+            case 'mastercard-debet': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_TEXT;
+            case 'mastercard-debet-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_DK_TEXT;
+            case 'american-express': return MODULE_PAYMENT_UNZER_ADVANCED_AMERICAN_EXPRESS_TEXT;
+            case 'american-express-dk': return MODULE_PAYMENT_UNZER_ADVANCED_AMERICAN_EXPRESS_DK_TEXT;
+            case 'dankort': return MODULE_PAYMENT_UNZER_ADVANCED_DANKORT_TEXT;
+            case 'diners': return MODULE_PAYMENT_UNZER_ADVANCED_DINERS_TEXT;
+            case 'diners-dk': return MODULE_PAYMENT_UNZER_ADVANCED_DINERS_DK_TEXT;
+            case 'jcb': return MODULE_PAYMENT_UNZER_ADVANCED_JCB_TEXT;
+            case 'visa': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_TEXT;
+            case 'visa-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DK_TEXT;
+            case 'visa-electron': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_TEXT;
+            case 'visa-electron-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_DK_TEXT;
+            case 'viabill': return MODULE_PAYMENT_UNZER_ADVANCED_VIABILL_TEXT;
+            case 'fbg1886': return MODULE_PAYMENT_UNZER_ADVANCED_FBG1886_TEXT;
+            case 'paypal': return MODULE_PAYMENT_UNZER_ADVANCED_PAYPAL_TEXT;
+            case 'sofort': return MODULE_PAYMENT_UNZER_ADVANCED_SOFORT_TEXT;
+            case 'mobilepay': return MODULE_PAYMENT_UNZER_ADVANCED_MOBILEPAY_TEXT;
+            case 'bitcoin': return MODULE_PAYMENT_UNZER_ADVANCED_BITCOIN_TEXT;
+            case 'swish': return MODULE_PAYMENT_UNZER_ADVANCED_SWISH_TEXT;
+            case 'trustly': return MODULE_PAYMENT_UNZER_ADVANCED_TRUSTLY_TEXT;
+            case 'klarna': return MODULE_PAYMENT_UNZER_ADVANCED_KLARNA_TEXT;
 
-            case 'maestro': return MODULE_PAYMENT_QUICKPAY_ADVANCED_MAESTRO_TEXT;
-            case 'ideal': return MODULE_PAYMENT_QUICKPAY_ADVANCED_IDEAL_TEXT;
-            case 'paysafecard': return MODULE_PAYMENT_QUICKPAY_ADVANCED_PAYSAFECARD_TEXT;
-            case 'resurs': return MODULE_PAYMENT_QUICKPAY_ADVANCED_RESURS_TEXT;
-            case 'vipps': return MODULE_PAYMENT_QUICKPAY_ADVANCED_VIPPS_TEXT;
+            case 'maestro': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_TEXT;
+            case 'ideal': return MODULE_PAYMENT_UNZER_ADVANCED_IDEAL_TEXT;
+            case 'paysafecard': return MODULE_PAYMENT_UNZER_ADVANCED_PAYSAFECARD_TEXT;
+            case 'resurs': return MODULE_PAYMENT_UNZER_ADVANCED_RESURS_TEXT;
+            case 'vipps': return MODULE_PAYMENT_UNZER_ADVANCED_VIPPS_TEXT;
 
-            // case 'danske-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_DANSKE_DK_TEXT;
-            // case 'edankort': return MODULE_PAYMENT_QUICKPAY_ADVANCED_EDANKORT_TEXT;
-            // case 'nordea-dk': return MODULE_PAYMENT_QUICKPAY_ADVANCED_NORDEA_DK_TEXT;
-            // case 'viabill':  return MODULE_PAYMENT_QUICKPAY_ADVANCED_viabill_DESCRIPTION;
-            // case 'paii': return MODULE_PAYMENT_QUICKPAY_ADVANCED_PAII_TEXT;
+            // case 'danske-dk': return MODULE_PAYMENT_UNZER_ADVANCED_DANSKE_DK_TEXT;
+            // case 'edankort': return MODULE_PAYMENT_UNZER_ADVANCED_EDANKORT_TEXT;
+            // case 'nordea-dk': return MODULE_PAYMENT_UNZER_ADVANCED_NORDEA_DK_TEXT;
+            // case 'viabill':  return MODULE_PAYMENT_UNZER_ADVANCED_viabill_DESCRIPTION;
+            // case 'paii': return MODULE_PAYMENT_UNZER_ADVANCED_PAII_TEXT;
         }
         return '';
     }
@@ -1371,19 +1371,19 @@ EOT;
     }
 
 
-    private function get_quickpay_order_status($order_id, $mode="") {
-        $api = new QuickpayApi();
-        $api->setOptions(MODULE_PAYMENT_QUICKPAY_ADVANCED_USERAPIKEY);
+    private function get_unzer_order_status($order_id, $mode="") {
+        $api = new UnzerApi();
+        $api->setOptions(MODULE_PAYMENT_UNZER_ADVANCED_USERAPIKEY);
 
         try {
             $api->mode = ($mode == "" ? "payments?order_id=" : "subscriptions?order_id=");
 
             // Commit the status request, checking valid transaction id
-            $st = $api->status(MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX . sprintf('%04d', $order_id));
+            $st = $api->status(MODULE_PAYMENT_UNZER_ADVANCED_ORDERPREFIX . sprintf('%04d', $order_id));
 
             $eval = array();
             if ($st[0]["id"]) {
-                $eval["oid"] = str_replace(MODULE_PAYMENT_QUICKPAY_ADVANCED_ORDERPREFIX, "", $st[0]["order_id"]);
+                $eval["oid"] = str_replace(MODULE_PAYMENT_UNZER_ADVANCED_ORDERPREFIX, "", $st[0]["order_id"]);
                 $eval["qid"] = $st[0]["id"];
             } else {
                 $eval["oid"] = null;
@@ -1391,7 +1391,7 @@ EOT;
             }
 
         } catch (Exception $e) {
-            $eval = 'QuickPay Status: ';
+            $eval = 'Unzer Status: ';
             // An error occured with the status request
             $eval .= 'Problem: ' . $this->json_message_front($e->getMessage()) ;
             //  tep_redirect(tep_href_link(FILENAME_CHECKOUT_PAYMENT, 'payment_error=' . $this->code, 'SSL'));
@@ -1461,7 +1461,7 @@ function edit_logos($values, $key) {
 
     /** Display logos to be shown */
     $values_array = !empty($values) ? explode(';', $values) : array();
-    $output = '<h3>' . MODULE_PAYMENT_QUICKPAY_CARD_LOGOS_SHOWN_CARDS . '</h3>' .
+    $output = '<h3>' . MODULE_PAYMENT_UNZER_CARD_LOGOS_SHOWN_CARDS . '</h3>' .
               '<ul id="ca_logos" style="list-style-type: none; margin: 0; padding: 5px; margin-bottom: 10px;">';
 
     foreach ($values_array as $optionc) {
@@ -1481,7 +1481,7 @@ function edit_logos($values, $key) {
     $output .= '</ul>';
 
     /** Display available logos */
-    $output .= '<h3>' . MODULE_PAYMENT_QUICKPAY_CARD_LOGOS_NEW_CARDS . '</h3><ul id="new_ca_logos" style="list-style-type: none; margin: 0; padding: 5px; margin-bottom: 10px;">';
+    $output .= '<h3>' . MODULE_PAYMENT_UNZER_CARD_LOGOS_NEW_CARDS . '</h3><ul id="new_ca_logos" style="list-style-type: none; margin: 0; padding: 5px; margin-bottom: 10px;">';
     foreach ($files_array as $file) {
         /** Check if logo is not already displayed in "Available list" */
         if ( !in_array(explode(".",$file)[0], $values_array) ) {
@@ -1493,7 +1493,7 @@ function edit_logos($values, $key) {
 
     $output .= tep_draw_hidden_field('configuration[' . $key . ']', '', 'id="ca_logo_cards"');
 
-    $drag_here_li = '<li id="caLogoEmpty" style="background-color: #fcf8e3; border: 1px #faedd0 solid; color: #a67d57; padding: 5px;">' . addslashes(MODULE_PAYMENT_QUICKPAY_CARD_LOGOS_DRAG_HERE) . '</li>';
+    $drag_here_li = '<li id="caLogoEmpty" style="background-color: #fcf8e3; border: 1px #faedd0 solid; color: #a67d57; padding: 5px;">' . addslashes(MODULE_PAYMENT_UNZER_CARD_LOGOS_DRAG_HERE) . '</li>';
 
     /** Drag and Drop logic */
     $output .= <<<EOD
@@ -1590,7 +1590,7 @@ $paiioptions = array(
                             'SC34' => 'Erotik og voksenprodukter(fysiske produkter)',
                         );
     $options = '';
-    $paiique = tep_db_query("select configuration_value  from ".TABLE_CONFIGURATION. " WHERE configuration_key  =  'MODULE_PAYMENT_QUICKPAY_ADVANCED_PAII_CAT' ");
+    $paiique = tep_db_query("select configuration_value  from ".TABLE_CONFIGURATION. " WHERE configuration_key  =  'MODULE_PAYMENT_UNZER_ADVANCED_PAII_CAT' ");
     $paiicat_values = tep_db_fetch_array($paiique);
     $selectedcat = $paiicat_values['configuration_value'];
 
@@ -1607,7 +1607,7 @@ foreach($paiioptions as $arrid => $val){
 
   function tep_cfg_pull_down_paii_list($option_array) {
      global $options;
-    return "<select name='configuration[MODULE_PAYMENT_QUICKPAY_ADVANCED_PAII_CAT]' />
+    return "<select name='configuration[MODULE_PAYMENT_UNZER_ADVANCED_PAII_CAT]' />
     ".$options."
     </select>";
 
