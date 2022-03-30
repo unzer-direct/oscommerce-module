@@ -10,6 +10,9 @@
  * author: Genuineq office@genuineq.com
  */
 
+ /** Module version. */
+define('MODULE_VERSION', '1.5.0');
+
 // 2.3.4BS Edge compatibility
 if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES','includes/classes/');
 if (!defined('DIR_WS_ICONS')) define('DIR_WS_ICONS','images/icons/');
@@ -788,7 +791,7 @@ EOT;
 
             'shopsystem' => [
                 'name' => "OsCommerce",
-                'version' => "1.0.4"
+                'version' => MODULE_VERSION
             ]
         ];
 
@@ -1348,6 +1351,7 @@ EOT;
             case 'klarna': return MODULE_PAYMENT_UNZER_ADVANCED_KLARNA_TEXT;
             case 'apple-pay': return MODULE_PAYMENT_UNZER_ADVANCED_APPLE_PAY_TEXT;
             case 'google-pay': return MODULE_PAYMENT_UNZER_ADVANCED_GOOGLE_PAY_TEXT;
+            case 'unzer-pay-later-invoice': return MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_INVOICE_TEXT;
 
             case 'maestro': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_TEXT;
             case 'ideal': return MODULE_PAYMENT_UNZER_ADVANCED_IDEAL_TEXT;

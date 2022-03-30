@@ -95,6 +95,7 @@ define('MODULE_PAYMENT_UNZER_ADVANCED_RESURS_TEXT', 'Resurs');
 define('MODULE_PAYMENT_UNZER_ADVANCED_VIPPS_TEXT', 'Vipps');
 define('MODULE_PAYMENT_UNZER_ADVANCED_APPLE_PAY_TEXT', 'Apple Pay');
 define('MODULE_PAYMENT_UNZER_ADVANCED_GOOGLE_PAY_TEXT', 'Google Pay');
+define('MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_INVOICE_TEXT', 'Unzer Direct Invoice');
 
 /* Admin pannel > creditcard logos configuration */
 define('MODULE_PAYMENT_UNZER_CARD_LOGOS_SHOWN_CARDS', 'Shown logos');
