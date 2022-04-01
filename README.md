@@ -2,7 +2,7 @@
 Unzer payment module for osCommerce
 Modular package.
 
-Version 1.0.5 - 30.03.2022
+Version 1.0.6 - 01.04.2022
 
 Compatibility:
 Unzer API v10 with
@@ -21,9 +21,11 @@ Support thread on osCommerce forums:
 https://forums.oscommerce.com/topic/412146-unzer-payment-module-for-23/
 
 Changelog
+#### 1.0.6
+- Added Unzer Direct Invoice payment method
+- fix payment (_payment) logos height
 #### 1.0.5
 - Added Apple Pay & Google pay payment methods
-- Added Unzer Direct Invoice payment method
 #### 1.0.4
 - Added all payment request fields in accordance to the documentation.
 - Removed custom variables from payment request.

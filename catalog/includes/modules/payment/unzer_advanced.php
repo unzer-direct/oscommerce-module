@@ -11,7 +11,7 @@
  */
 
  /** Module version. */
-define('MODULE_VERSION', '1.5.0');
+define('MODULE_VERSION', '1.0.6');
 
 // 2.3.4BS Edge compatibility
 if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES','includes/classes/');
@@ -173,7 +173,7 @@ class unzer_advanced {
 
     /* Define payment method selector on checkout page */
     public function selection() {
-        global $order, $currencies, $unzer_card, $cardlock;
+        global $order, $currencies, $unzer_card, $cardlock, $language;
         $qty_groups = 0;
 
         /** Count how many MODULE_PAYMENT_UNZER_ADVANCED_GROUP are configured. */
@@ -284,12 +284,20 @@ class unzer_advanced {
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.gif")){
                               $icon = DIR_WS_ICONS . $option . "_payment.gif";
                             }
+
+                            /**
+                             * Custom check for german language to add icon with german text
+                             */
+                            if ('german' == $language && 'unzer-pay-later-invoice' == $option) {
+                                $icon = (file_exists(DIR_WS_ICONS.$option."_DE_payment.png") ? DIR_WS_ICONS.$option."_DE_payment.png" : $icon);
+                            }
+
                             $space = 5;
 
                             //define payment icon width
                             if(strstr($icon, "_payment")){
                                 $w = 120;
-                                $h = 27;
+                                $h = 65;
                                 if(strstr($icon, "3d")){
                                     $w = 60;
                                 }

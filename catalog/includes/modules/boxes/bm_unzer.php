@@ -91,7 +91,7 @@ class bm_unzer {
                                 //define payment icon width
                                 if (strstr($icon, "_payment")) {
                                     $w = 120;
-                                    $h = 27;
+                                    $h = 65;
                                     $space = 9;
                                 } else {
                                     $w = 36;
