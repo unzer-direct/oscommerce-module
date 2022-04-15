@@ -11,7 +11,7 @@
  */
 
  /** Module version. */
-define('MODULE_VERSION', '1.0.7');
+define('UNZER_MODULE_VERSION', '1.0.8');
 
 // 2.3.4BS Edge compatibility
 if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES','includes/classes/');
@@ -271,12 +271,31 @@ class unzer_advanced {
 
                             /**
                              * Check if the option is "sofort" & if the order currency is NOT one of the following.
-                             * Skip this option if its true
+                             *
+                             * SKIP this option if its true
                              *
                              * !!! HARDCODED currencies !!!
                              */
                             if ('sofort' == $option && !in_array($order->info['currency'], ['EUR', 'GBP', 'PLN', 'CHF'])) {
                                 continue;
+                            }
+
+                            /**
+                             * Check if the option is "Unzer Direct Invoice"
+                             * Check if the order currency is NOT one of the following.
+                             * Check if total amount in under or exceed specified limits
+                             *
+                             * SKIP this option if its true
+                             *
+                             * !!! HARDCODED currencies !!!
+                             */
+                            if ('unzer-pay-later-invoice' == $option) {
+                                if (!in_array($order->info['currency'], ['EUR', 'CHF'])) {
+                                    continue;
+                                }
+                                if (10 > $order->info['total'] || $order->info['total'] > 3500) {
+                                    continue;
+                                }
                             }
 
                             $optscount++;
@@ -815,7 +834,7 @@ EOT;
 
             'shopsystem' => [
                 'name' => "OsCommerce",
-                'version' => MODULE_VERSION
+                'version' => UNZER_MODULE_VERSION
             ]
         ];
 
