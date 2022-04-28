@@ -11,7 +11,7 @@
  */
 
  /** Module version. */
-define('UNZER_MODULE_VERSION', '1.0.8');
+define('UNZER_MODULE_VERSION', '1.0.10');
 
 // 2.3.4BS Edge compatibility
 if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES','includes/classes/');
@@ -171,6 +171,34 @@ class unzer_advanced {
         return $js;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSafariBrowser()
+    {
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        $isSafari = false;
+        if (preg_match('/Safari/i', $userAgent)) {
+            $isSafari = (!preg_match('/Chrome/i', $userAgent));
+        }
+
+        return $isSafari;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChromeBrowser()
+    {
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        $isChrome = false;
+        if (preg_match('/Chrome/i', $userAgent)) {
+            $isChrome = true;
+        }
+
+        return $isChrome;
+    }
+
     /* Define payment method selector on checkout page */
     public function selection() {
         global $order, $currencies, $unzer_card, $cardlock, $language;
@@ -192,7 +220,7 @@ class unzer_advanced {
 
         /** Parse all the configured MODULE_PAYMENT_UNZER_ADVANCED_GROUP */
         $selection['fields'] = array();
-        $msg = '<table width="100%"><tr><td>';
+        $msg = '<table width="100%"><tr><td style="text-align: end;">';
         $optscount=0;
         for ($i = 1; $i <= $this->num_groups; $i++) {
             $options_text = '';
@@ -213,10 +241,12 @@ class unzer_advanced {
                                 $iconc = DIR_WS_ICONS.$optionc.".jpg";
                             }elseif(file_exists(DIR_WS_ICONS.$optionc.".gif")){
                                 $iconc = DIR_WS_ICONS.$optionc.".gif";
+                            }elseif(file_exists(DIR_WS_ICONS.$optionc.".svg")){
+                                $iconc = DIR_WS_ICONS.$optionc.".svg";
                             }
 
                             /** Define payment icons width */
-                            $w = 35;
+                            $w = 'auto';
                             $h = 22;
                             $space = 5;
 
@@ -270,9 +300,25 @@ class unzer_advanced {
                         foreach($selectedopts as $option){
 
                             /**
+                             * Check if method is apple-pay & browser is NOT Safari
+                             * SKIP this option if true
+                             */
+                            if ('apple-pay' == $option && !$this->isSafariBrowser()) {
+                                continue;
+                            }
+
+                            /**
+                             * Check if method is google-pay & browser is NOT Chrome
+                             * SKIP this option if true
+                             */
+                            if ('google-pay' == $option && !$this->isChromeBrowser()) {
+                                continue;
+                            }
+
+                            /**
                              * Check if the option is "sofort" & if the order currency is NOT one of the following.
                              *
-                             * SKIP this option if its true
+                             * SKIP this option if true
                              *
                              * !!! HARDCODED currencies !!!
                              */
@@ -285,7 +331,7 @@ class unzer_advanced {
                              * Check if the order currency is NOT one of the following.
                              * Check if total amount in under or exceed specified limits
                              *
-                             * SKIP this option if its true
+                             * SKIP this option if true
                              *
                              * !!! HARDCODED currencies !!!
                              */
@@ -307,37 +353,38 @@ class unzer_advanced {
                               $icon = DIR_WS_ICONS.$option.".jpg";
                             }elseif(file_exists(DIR_WS_ICONS.$option.".gif")){
                               $icon = DIR_WS_ICONS.$option.".gif";
+                            }elseif(file_exists(DIR_WS_ICONS.$option.".svg")){
+                              $icon = DIR_WS_ICONS.$option.".svg";
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.png")){
                               $icon = DIR_WS_ICONS . $option . "_payment.png";
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.jpg")){
                               $icon = DIR_WS_ICONS . $option . "_payment.jpg";
                             }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.gif")){
                               $icon = DIR_WS_ICONS . $option . "_payment.gif";
+                            }elseif(file_exists(DIR_WS_ICONS . $option . "_payment.svg")){
+                              $icon = DIR_WS_ICONS . $option . "_payment.svg";
                             }
 
                             /**
                              * Custom check for german language to add icon with german text
                              */
                             if ('german' == $language && 'unzer-pay-later-invoice' == $option) {
-                                $icon = (file_exists(DIR_WS_ICONS.$option."_DE_payment.png") ? DIR_WS_ICONS.$option."_DE_payment.png" : $icon);
+                                $icon = (file_exists(DIR_WS_ICONS.$option."_DE_payment.svg") ? DIR_WS_ICONS.$option."_DE_payment.svg" : $icon);
                             }
 
                             /** Make icon larger for "sofort" payment method, as it is for others. */
                             if ('sofort' == $option) {
-                                $icon = (file_exists(DIR_WS_ICONS.$option."_payment.png") ? DIR_WS_ICONS.$option."_payment.png" : $icon);
+                                $icon = (file_exists(DIR_WS_ICONS.$option."_payment.svg") ? DIR_WS_ICONS.$option."_payment.svg" : $icon);
                             }
 
                             $space = 5;
 
                             //define payment icon width
                             if(strstr($icon, "_payment")){
-                                $w = 120;
-                                $h = 65;
-                                if(strstr($icon, "3d")){
-                                    $w = 60;
-                                }
+                                $w = 'auto';
+                                $h = 45;
                             }else{
-                                $w = 35;
+                                $w = 'auto';
                                 $h = 22;
                             }
 
@@ -346,8 +393,8 @@ class unzer_advanced {
                             /** Configuring the text to be shown for the payment option. */
                             $options_text = '<table width="100%">
                                                 <tr>
-                                                    <td>'.tep_image($icon,$this->get_payment_options_name($option),$w,$h,' style="position:relative;border:0px;float:left;margin:'.$space.'px;" ').'</td>
-                                                    <td style="height: 27px;white-space:nowrap;vertical-align:middle;" >';
+                                                    <td>'. tep_image($icon, $this->get_payment_options_name($option), $w, $h, ' style="position:relative;border:0px;float:left;margin:'.$space.'px;" ') . '</td>
+                                                    <td style="text-align: end;height: 27px;white-space:nowrap;vertical-align:middle;" >';
 
                             /** If there is an input in the text field for that payment option, that value will be shown to the user, otherwise, the default value will be used. */
                             if(defined('MODULE_PAYMENT_UNZER_ADVANCED_GROUP'.$i.'_TEXT') && constant('MODULE_PAYMENT_UNZER_ADVANCED_GROUP' . $i . '_TEXT') != ''){
@@ -437,6 +484,18 @@ class unzer_advanced {
                         });
                       })
                     })
+                });
+
+                /** Adjust width of payment methods table. */
+                document.addEventListener("DOMContentLoaded", function(){
+                    var unzerFirstRadio = document.querySelector("input[name=unzer_card]");
+                    unzerFirstRadio.parentNode.parentNode.parentNode.parentNode.style = "min-width:100%;";
+
+                    /** Align payment name to right. */
+                    var unzerInputRadio = document.querySelectorAll("input[name=unzer_card]");
+                    unzerInputRadio.forEach(item => {
+                        item.parentNode.style = "text-align: end;";
+                    });
                 });
 
             //--></script>';
@@ -1352,61 +1411,14 @@ EOT;
 
     function get_payment_options_name($payment_option) {
         switch ($payment_option) {
-            case 'creditcard': return MODULE_PAYMENT_UNZER_ADVANCED_CREDITCARD_TEXT;
-
-            case '3d-dankort': return MODULE_PAYMENT_UNZER_ADVANCED_DANKORT_3D_TEXT;
-            case '3d-jcb': return MODULE_PAYMENT_UNZER_ADVANCED_JCB_3D_TEXT;
-            case '3d-visa': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_3D_TEXT;
-            case '3d-visa-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DK_3D_TEXT;
-            case '3d-visa-electron': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_3D_TEXT;
-            case '3d-visa-electron-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_DK_3D_TEXT;
-            case '3d-visa-debet': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DEBET_3D_TEXT;
-            case '3d-visa-debet-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DEBET_DK_3D_TEXT;
-            case '3d-maestro': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_3D_TEXT;
-            case '3d-maestro-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_DK_3D_TEXT;
-            case '3d-mastercard': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_3D_TEXT;
-            case '3d-mastercard-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DK_3D_TEXT;
-            case '3d-mastercard-debet': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_3D_TEXT;
-            case '3d-mastercard-debet-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_DK_3D_TEXT;
-            case '3d-creditcard': return MODULE_PAYMENT_UNZER_ADVANCED_CREDITCARD_3D_TEXT;
-            case 'mastercard': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_TEXT;
-            case 'mastercard-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DK_TEXT;
-            case 'mastercard-debet': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_TEXT;
-            case 'mastercard-debet-dk': return MODULE_PAYMENT_UNZER_ADVANCED_MASTERCARD_DEBET_DK_TEXT;
-            case 'american-express': return MODULE_PAYMENT_UNZER_ADVANCED_AMERICAN_EXPRESS_TEXT;
-            case 'american-express-dk': return MODULE_PAYMENT_UNZER_ADVANCED_AMERICAN_EXPRESS_DK_TEXT;
-            case 'dankort': return MODULE_PAYMENT_UNZER_ADVANCED_DANKORT_TEXT;
-            case 'diners': return MODULE_PAYMENT_UNZER_ADVANCED_DINERS_TEXT;
-            case 'diners-dk': return MODULE_PAYMENT_UNZER_ADVANCED_DINERS_DK_TEXT;
-            case 'jcb': return MODULE_PAYMENT_UNZER_ADVANCED_JCB_TEXT;
-            case 'visa': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_TEXT;
-            case 'visa-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_DK_TEXT;
-            case 'visa-electron': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_TEXT;
-            case 'visa-electron-dk': return MODULE_PAYMENT_UNZER_ADVANCED_VISA_ELECTRON_DK_TEXT;
-            case 'viabill': return MODULE_PAYMENT_UNZER_ADVANCED_VIABILL_TEXT;
-            case 'fbg1886': return MODULE_PAYMENT_UNZER_ADVANCED_FBG1886_TEXT;
-            case 'paypal': return MODULE_PAYMENT_UNZER_ADVANCED_PAYPAL_TEXT;
-            case 'sofort': return MODULE_PAYMENT_UNZER_ADVANCED_SOFORT_TEXT;
-            case 'mobilepay': return MODULE_PAYMENT_UNZER_ADVANCED_MOBILEPAY_TEXT;
-            case 'bitcoin': return MODULE_PAYMENT_UNZER_ADVANCED_BITCOIN_TEXT;
-            case 'swish': return MODULE_PAYMENT_UNZER_ADVANCED_SWISH_TEXT;
-            case 'trustly': return MODULE_PAYMENT_UNZER_ADVANCED_TRUSTLY_TEXT;
-            case 'klarna': return MODULE_PAYMENT_UNZER_ADVANCED_KLARNA_TEXT;
-            case 'apple-pay': return MODULE_PAYMENT_UNZER_ADVANCED_APPLE_PAY_TEXT;
-            case 'google-pay': return MODULE_PAYMENT_UNZER_ADVANCED_GOOGLE_PAY_TEXT;
-            case 'unzer-pay-later-invoice': return MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_INVOICE_TEXT;
-
-            case 'maestro': return MODULE_PAYMENT_UNZER_ADVANCED_MAESTRO_TEXT;
-            case 'ideal': return MODULE_PAYMENT_UNZER_ADVANCED_IDEAL_TEXT;
-            case 'paysafecard': return MODULE_PAYMENT_UNZER_ADVANCED_PAYSAFECARD_TEXT;
-            case 'resurs': return MODULE_PAYMENT_UNZER_ADVANCED_RESURS_TEXT;
-            case 'vipps': return MODULE_PAYMENT_UNZER_ADVANCED_VIPPS_TEXT;
-
-            // case 'danske-dk': return MODULE_PAYMENT_UNZER_ADVANCED_DANSKE_DK_TEXT;
-            // case 'edankort': return MODULE_PAYMENT_UNZER_ADVANCED_EDANKORT_TEXT;
-            // case 'nordea-dk': return MODULE_PAYMENT_UNZER_ADVANCED_NORDEA_DK_TEXT;
-            // case 'viabill':  return MODULE_PAYMENT_UNZER_ADVANCED_viabill_DESCRIPTION;
-            // case 'paii': return MODULE_PAYMENT_UNZER_ADVANCED_PAII_TEXT;
+            case 'creditcard': return MODULE_PAYMENT_UNZER_ADVANCED_CREDITCARD_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_CREDITCARD_DESCRIPTION;
+            case 'unzer-pay-later-invoice': return MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_INVOICE_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_INVOICE_DESCRIPTION;
+            case 'unzer-direct-debit': return MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_DEBIT_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_DIRECT_DEBIT_DESCRIPTION;
+            case 'google-pay': return MODULE_PAYMENT_UNZER_ADVANCED_GOOGLE_PAY_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_GOOGLE_PAY_DESCRIPTION;
+            case 'apple-pay': return MODULE_PAYMENT_UNZER_ADVANCED_APPLE_PAY_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_APPLE_PAY_DESCRIPTION;
+            case 'sofort': return MODULE_PAYMENT_UNZER_ADVANCED_SOFORT_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_SOFORT_DESCRIPTION;
+            case 'paypal': return MODULE_PAYMENT_UNZER_ADVANCED_PAYPAL_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_PAYPAL_DESCRIPTION;
+            case 'klarna': return MODULE_PAYMENT_UNZER_ADVANCED_KLARNA_TEXT . "<br>" . MODULE_PAYMENT_UNZER_ADVANCED_KLARNA_DESCRIPTION;
         }
         return '';
     }
@@ -1462,8 +1474,8 @@ EOT;
 
 /** Display logos in the admin panel in view state */
 function show_logos($text) {
-    $w = 55;
-    $h = 'auto';
+    $w = 'auto';
+    $h = 22;
     $output = '';
 
     if ( !empty($text) ) {
@@ -1478,6 +1490,8 @@ function show_logos($text) {
                 $iconc = DIR_WS_CATALOG_IMAGES . 'icons/'.$optionc.".jpg";
             }elseif(file_exists(DIR_FS_CATALOG . DIR_WS_IMAGES . 'icons/'.$optionc.".gif")){
                 $iconc = DIR_WS_CATALOG_IMAGES . 'icons/'.$optionc.".gif";
+            }elseif(file_exists(DIR_FS_CATALOG . DIR_WS_IMAGES . 'icons/'.$optionc.".svg")){
+                $iconc = DIR_WS_CATALOG_IMAGES . 'icons/'.$optionc.".svg";
             }
 
             if(strlen($iconc))
@@ -1490,8 +1504,8 @@ function show_logos($text) {
 
 /** Display logos in the admin panel in edit state */
 function edit_logos($values, $key) {
-    $w = 55;
-    $h = 'auto';
+    $w = 'auto';
+    $h = 22;
 
     /** Scan images directory for logos */
     $files_array = array();
@@ -1499,7 +1513,7 @@ function edit_logos($values, $key) {
         while ( $file = $dir->read() ) {
             /** Check if image is valid */
             if ( !is_dir(DIR_FS_CATALOG . DIR_WS_IMAGES . 'icons/' . $file ) && in_array(explode('.',$file)[0],MODULE_AVAILABLE_CREDITCARDS)) {
-                if (in_array(substr($file, strrpos($file, '.')+1), array('gif', 'jpg', 'png')) ) {
+                if (in_array(substr($file, strrpos($file, '.')+1), array('gif', 'jpg', 'png', 'svg')) ) {
                     $files_array[] = $file;
                 }
             }
@@ -1521,6 +1535,8 @@ function edit_logos($values, $key) {
             $iconc = DIR_WS_CATALOG_IMAGES . 'icons/' . $optionc.".jpg";
         }elseif(file_exists(DIR_FS_CATALOG . DIR_WS_IMAGES . 'icons/'.$optionc.".gif")){
             $iconc = DIR_WS_CATALOG_IMAGES . 'icons/' . $optionc.".gif";
+        }elseif(file_exists(DIR_FS_CATALOG . DIR_WS_IMAGES . 'icons/'.$optionc.".svg")){
+            $iconc = DIR_WS_CATALOG_IMAGES . 'icons/' . $optionc.".svg";
         }
 
         if(strlen($iconc))
