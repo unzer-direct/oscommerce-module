@@ -11,7 +11,7 @@
  */
 
  /** Module version. */
-define('UNZER_MODULE_VERSION', '1.0.10');
+define('UNZER_MODULE_VERSION', '1.0.12');
 
 // 2.3.4BS Edge compatibility
 if (!defined('DIR_WS_CLASSES')) define('DIR_WS_CLASSES','includes/classes/');
@@ -26,32 +26,9 @@ if (!defined('FILENAME_SHIPPING')) define('FILENAME_SHIPPING','shipping.php');
 /** You can extend the following cards-array and upload corresponding titled images to images/icons */
 if (!defined('MODULE_AVAILABLE_CREDITCARDS'))
 define('MODULE_AVAILABLE_CREDITCARDS',array(
-    '3d-dankort',
-    '3d-jcb',
-    '3d-visa',
-    '3d-mastercard',
     'mastercard',
-    'mastercard-debet',
-    'american-express',
-    'dankort',
-    'diners',
-    'jcb',
     'visa',
-    'visa-electron',
-    'viabill',
-    'fbg1886',
-    'paypal',
-    'sofort',
-    'mobilepay',
-    'bitcoin',
-    'swish',
-    'trustly',
-    'klarna',
     'maestro',
-    'ideal',
-    'paysafecard',
-    'resurs',
-    'vipps',
 ));
 
 include(DIR_FS_CATALOG.DIR_WS_CLASSES.'UnzerApi.php');
@@ -328,15 +305,41 @@ class unzer_advanced {
 
                             /**
                              * Check if the option is "Unzer Direct Invoice"
+                             * Check if the customer country is NOT one of the following.
                              * Check if the order currency is NOT one of the following.
                              * Check if total amount in under or exceed specified limits
                              *
                              * SKIP this option if true
                              *
-                             * !!! HARDCODED currencies !!!
+                             * !!! HARDCODED VALUES !!!
                              */
                             if ('unzer-pay-later-invoice' == $option) {
+                                if (!in_array($order->customer['country']['iso_code_2'], ['DE', 'AT', 'CH'])) {
+                                    continue;
+                                }
                                 if (!in_array($order->info['currency'], ['EUR', 'CHF'])) {
+                                    continue;
+                                }
+                                if (10 > $order->info['total'] || $order->info['total'] > 3500) {
+                                    continue;
+                                }
+                            }
+
+                            /**
+                             * Check if the option is "Unzer Direct Debit"
+                             * Check if the customer country is NOT one of the following.
+                             * Check if the order currency is NOT one of the following.
+                             * Check if total amount in under or exceed specified limits
+                             *
+                             * SKIP this option if true
+                             *
+                             * !!! HARDCODED VALUES !!!
+                             */
+                            if ('unzer-direct-debit' == $option) {
+                                if (!in_array($order->customer['country']['iso_code_2'], ['DE', 'AT'])) {
+                                    continue;
+                                }
+                                if (!in_array($order->info['currency'], ['EUR'])) {
                                     continue;
                                 }
                                 if (10 > $order->info['total'] || $order->info['total'] > 3500) {

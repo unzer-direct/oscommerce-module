@@ -2,7 +2,7 @@
 Unzer payment module for osCommerce
 Modular package.
 
-Version 1.0.10 - 26.04.2022
+Version 1.0.12 - 14.05.2022
 
 Compatibility:
 Unzer API v10 with
@@ -21,6 +21,10 @@ Support thread on osCommerce forums:
 https://forums.oscommerce.com/topic/412146-unzer-payment-module-for-23/
 
 Changelog
+#### 1.0.12
+- Added checks for Direct Debit method
+#### 1.0.11
+- Added check customer country for direct invoice method
 #### 1.0.10
 - Added check for Safari/Chrome browser for payment methods to be displayed
 - Fix payment methods table width
